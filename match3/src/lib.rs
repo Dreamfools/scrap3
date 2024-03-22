@@ -309,7 +309,7 @@ impl<
                     gem.clone(),
                     std::mem::take(&mut self.match_cells_cache).unwrap_or_default(),
                 );
-
+                todo!("Only backtrack when the previous cell was a wildcard");
                 for i in (0..=i).rev() {
                     let back_pos = line[i];
                     let back_gem = self.cells[back_pos].as_ref();
