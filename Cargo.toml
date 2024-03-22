@@ -2,11 +2,12 @@
 resolver = "2"
 members = ["game", "match3"]
 default-members = ["game"]
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
 comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "13f4ac09fc9b664ec32b67b98bbb950c71269cb6" }
+nohash-hasher = "0.2.0"
+smallvec = "1.13.2"
 
 [profile.release]
 opt-level = 3

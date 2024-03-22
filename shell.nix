@@ -21,6 +21,14 @@ in mkShell.override {
     })
     pkg-config
     alsa-lib
+          pkgs.cargo-bloat
+          pkgs.cargo-unused-features
+          pkgs.cargo-watch
+          pkgs.cargo-sort
+          pkgs.cargo-machete
+          pkgs.cargo-depgraph
+          pkgs.cargo-limit
+          pkgs.pre-commit
   ];
   shellHook = ''
     export RUST_BACKTRACE=1
@@ -30,5 +38,6 @@ in mkShell.override {
     # export VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation
     # export XDG_DATA_DIRS="$XDG_DATA_DIRS:${vulkan-validation-layers}/share"
     export RUST_LOG=client=trace,server=trace,common=trace,vulkan=info
+    pre-commit install
   '';
 }
