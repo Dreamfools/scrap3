@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+members = ["game", "match3"]
+default-members = ["game"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.dependencies]
+comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "13f4ac09fc9b664ec32b67b98bbb950c71269cb6" }
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = true
+strip = true
+
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+lto = "off"
+#opt-level = 1
+
+# Enable high optimizations for dependencies, but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
