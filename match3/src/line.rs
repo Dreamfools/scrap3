@@ -283,6 +283,9 @@ impl<
     }
 
     fn match_line(&mut self, line: &[usize]) {
+        if line.len() < self.settings.line_size {
+            return;
+        }
         let mut current_match: Option<BoardMatch<Color>> = None;
         let mut was_wildcard = false;
         for i in 0..line.len() {
