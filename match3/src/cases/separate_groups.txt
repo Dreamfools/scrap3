@@ -1,0 +1,4 @@
+Should match groups in a middle of a line
+yrrrw
+ygggw
+ybbbw

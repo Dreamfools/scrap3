@@ -1,4 +1,4 @@
-Empty Board
+Should not match an empty board
 -----
 -----
 -----

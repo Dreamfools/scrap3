@@ -2,7 +2,7 @@
 source: match3/src/tests.rs
 expression: "visualize_snapshot(name, board, matches, false)"
 ---
-Vertical Line
+Should match vertical line
 Board: 
 ╭─╮
 │r│

@@ -1,2 +1,2 @@
-Incomplete Horizontal Line
+Should not match incomplete horizontal line
 rr-

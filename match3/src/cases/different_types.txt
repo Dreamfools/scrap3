@@ -1,2 +1,2 @@
-Different Types
+Should not mix different types
 rrgg

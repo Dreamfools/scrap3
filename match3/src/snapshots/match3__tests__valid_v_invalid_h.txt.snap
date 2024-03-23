@@ -2,16 +2,22 @@
 source: match3/src/tests.rs
 expression: "visualize_snapshot(name, board, matches, false)"
 ---
-Should match horizontal line
+Should match valid vertical while not matching invalid horizontal
 Board: 
 ╭───╮
-│rrr│
+│rr-│
+│r--│
+│r--│
 ╰───╯
 Match #0:
 ╭───╮
-│rrr│
+│r  │
+│r  │
+│r  │
 ╰───╯
 Remaining cells:
 ╭───╮
-│   │
+│ r-│
+│ --│
+│ --│
 ╰───╯

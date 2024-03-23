@@ -1,0 +1,47 @@
+---
+source: match3/src/tests.rs
+expression: "visualize_snapshot(name, board, matches, false)"
+---
+Should match groups in a middle of a line
+Board: 
+╭─────╮
+│yrrrw│
+│ygggw│
+│ybbbw│
+╰─────╯
+Match #0:
+╭─────╮
+│y    │
+│y    │
+│y    │
+╰─────╯
+Match #1:
+╭─────╮
+│ rrr │
+│     │
+│     │
+╰─────╯
+Match #2:
+╭─────╮
+│    w│
+│    w│
+│    w│
+╰─────╯
+Match #3:
+╭─────╮
+│     │
+│ ggg │
+│     │
+╰─────╯
+Match #4:
+╭─────╮
+│     │
+│     │
+│ bbb │
+╰─────╯
+Remaining cells:
+╭─────╮
+│     │
+│     │
+│     │
+╰─────╯

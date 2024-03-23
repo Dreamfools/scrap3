@@ -1,0 +1,4 @@
+Should match valid vertical while not matching invalid horizontal
+rr-
+r--
+r--

@@ -1,2 +1,2 @@
-Horizontal Line
+Should match horizontal line
 rrr

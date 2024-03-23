@@ -147,7 +147,7 @@ fn visualize_snapshot(
 }
 
 #[rstest]
-pub fn common_line3_file_tests(#[files("src/cases/**/*.txt")] path: PathBuf) {
+pub fn common_line3_file_tests(#[files("src/cases/*.txt")] path: PathBuf) {
     let file_name = path
         .file_name()
         .expect("All cases should have a file name")
@@ -157,4 +157,11 @@ pub fn common_line3_file_tests(#[files("src/cases/**/*.txt")] path: PathBuf) {
     let (name, board) = board_from_path(path);
     let matches = board.find_matches(S::common_match3());
     assert_snapshot!(file_name, visualize_snapshot(name, board, matches, false));
+}
+
+#[test]
+pub fn test_dev() {
+    let b = board_from_str("grrrb");
+    let matches = b.find_matches(S::common_match3());
+    visualize_snapshot("DEV".to_string(), b, matches, false);
 }
