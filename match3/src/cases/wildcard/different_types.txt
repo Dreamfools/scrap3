@@ -1,0 +1,2 @@
+Should not merge wildcard groups of different types
+r**g

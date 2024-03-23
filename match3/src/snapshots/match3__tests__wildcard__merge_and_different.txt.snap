@@ -1,0 +1,37 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should merge wildcard groups while avoiding different groups
+Board: 
+╭───╮
+│--r│
+│--*│
+│r**│
+│--*│
+│--g│
+╰───╯
+Match #0 - g:
+╭───╮
+│   │
+│  *│
+│  *│
+│  *│
+│  g│
+╰───╯
+Match #1 - r:
+╭───╮
+│  r│
+│  *│
+│r**│
+│  *│
+│   │
+╰───╯
+Remaining cells:
+╭───╮
+│-- │
+│-- │
+│   │
+│-- │
+│-- │
+╰───╯

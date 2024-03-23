@@ -229,10 +229,11 @@ fn visualize_snapshot(
 pub fn common_line3_file_tests(#[files("src/cases/common/*.txt")] path: PathBuf) {
     check_path("common", path);
 }
-// #[rstest]
-// pub fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf) {
-//     check_path("common", path);
-// }
+
+#[rstest]
+pub fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf) {
+    check_path("wildcard", path);
+}
 
 #[test]
 pub fn test_dev() {

@@ -1,0 +1,21 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should not merge wildcard groups of different types
+Board: 
+╭────╮
+│r**g│
+╰────╯
+Match #0 - r:
+╭────╮
+│r** │
+╰────╯
+Match #1 - g:
+╭────╮
+│ **g│
+╰────╯
+Remaining cells:
+╭────╮
+│    │
+╰────╯

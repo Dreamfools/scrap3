@@ -1,0 +1,4 @@
+Should match wildcard - vertical
+r
+*
+*

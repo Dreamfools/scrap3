@@ -1,0 +1,10 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should not match wildcards only
+Board: 
+╭───╮
+│***│
+╰───╯
+No matches

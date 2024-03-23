@@ -1,0 +1,4 @@
+Should merge wildcard groups
+r**
+--*
+--r

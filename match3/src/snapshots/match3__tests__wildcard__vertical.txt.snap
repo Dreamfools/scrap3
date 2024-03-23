@@ -1,0 +1,23 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should match wildcard - vertical
+Board: 
+╭─╮
+│r│
+│*│
+│*│
+╰─╯
+Match #0 - r:
+╭─╮
+│r│
+│*│
+│*│
+╰─╯
+Remaining cells:
+╭─╮
+│ │
+│ │
+│ │
+╰─╯

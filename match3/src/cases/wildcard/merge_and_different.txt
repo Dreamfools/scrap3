@@ -1,0 +1,6 @@
+Should merge wildcard groups while avoiding different groups
+--r
+--*
+r**
+--*
+--g
