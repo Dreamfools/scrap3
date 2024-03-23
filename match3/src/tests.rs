@@ -286,8 +286,8 @@ w*b
 -bb",
     );
     let mut settings = S::common_match3();
-    settings.merge_neighbours = false;
-    settings.line_size = 2;
+    // settings.merge_neighbours = false;
+    // settings.line_size = 2;
     let matches = b.find_matches_linear(settings);
     visualize_snapshot("DEV".to_string(), b, matches, false);
 }
@@ -296,7 +296,9 @@ w*b
 fn random_tests() {
     let mut runner = TestRunner::default();
     let run_result = runner.run(&prop_board(64), |board| {
-        let matches = board.find_matches_linear(S::common_match3());
+        let mut settings = S::common_match3();
+        settings.line_size = 3;
+        let matches = board.find_matches_linear(settings);
         let mut cloned = board.clone();
         for m in &matches {
             for &x in &m.cells {
