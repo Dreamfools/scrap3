@@ -109,7 +109,15 @@ impl<
         for line in self.lines {
             self.match_line(line.as_ref());
         }
-        self.matches.into_iter().flatten().collect()
+        self.matches
+            .into_iter()
+            .flatten()
+            .map(|mut g| {
+                g.cells.sort_unstable();
+                g.cells.dedup();
+                g
+            })
+            .collect()
     }
 
     fn close_match(&mut self, mut group: BoardMatch<Color>) {
