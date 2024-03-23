@@ -142,7 +142,7 @@ fn check_path(prefix: &str, path: impl AsRef<Path>) {
         .to_string_lossy()
         .to_string();
 
-    assert_snapshot!(file_name, variants[0].1);
+    assert_snapshot!(format!("{}__{}", prefix, file_name), variants[0].1);
 }
 
 fn color_char(c: char) -> String {
@@ -222,15 +222,13 @@ fn visualize_snapshot(
 }
 
 #[rstest]
-pub fn common_line3_file_tests(#[files("src/cases/*.txt")] path: PathBuf) {
-    let file_name = path
-        .file_name()
-        .expect("All cases should have a file name")
-        .to_string_lossy()
-        .to_string();
-
+pub fn common_line3_file_tests(#[files("src/cases/common/*.txt")] path: PathBuf) {
     check_path("common", path);
 }
+// #[rstest]
+// pub fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf) {
+//     check_path("common", path);
+// }
 
 #[test]
 pub fn test_dev() {

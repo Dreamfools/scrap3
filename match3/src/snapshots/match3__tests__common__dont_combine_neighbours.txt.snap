@@ -1,6 +1,6 @@
 ---
 source: match3/src/tests.rs
-expression: "visualize_snapshot(name, board, matches, false)"
+expression: "variants[0].1"
 ---
 Should not combine neighboring groups when merge_neighbours=false
 Board: 
