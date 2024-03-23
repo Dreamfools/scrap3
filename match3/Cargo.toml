@@ -14,3 +14,5 @@ smallvec = { workspace = true }
 colored = { workspace = true }
 insta = { workspace = true }
 rstest = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json5 = { workspace = true }

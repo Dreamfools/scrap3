@@ -1,0 +1,4 @@
+Should combine neighboring groups when merge_neighbours=true
+{merge_neighbours: true}
+rrr--
+--rrr

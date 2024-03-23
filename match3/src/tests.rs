@@ -7,6 +7,7 @@ use itertools::Itertools;
 use ndshape::RuntimeShape;
 use nohash_hasher::IntSet;
 use rstest::rstest;
+use serde::Deserialize;
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 
@@ -62,12 +63,86 @@ fn board_from_str(board: &str) -> CharBoard {
     CharBoard::new(shape, board)
 }
 
-fn board_from_path(path: impl AsRef<Path>) -> (String, CharBoard) {
+#[derive(Deserialize)]
+struct MatchSettings {
+    line_size: Option<usize>,
+    min_group_size: Option<usize>,
+    merge_neighbours: Option<bool>,
+}
+
+fn check_path(prefix: &str, path: impl AsRef<Path>) {
+    let path = path.as_ref();
     let test = std::fs::read_to_string(path).unwrap();
-    let mut lines = test.lines();
+    let mut lines = test.lines().peekable();
     let name = lines.next().expect("Should have name").trim();
-    let board = lines.join("\n");
-    (name.to_string(), board_from_str(&board))
+    let mut settings_variations: Vec<(&'static str, S)> = vec![];
+    if let Some(peek) = lines.peek() {
+        if peek.starts_with('{') {
+            let mut match_settings = S::common_match3();
+            let settings = serde_json5::from_str::<MatchSettings>(peek.trim()).unwrap();
+
+            match_settings.line_size = settings.line_size.unwrap_or(match_settings.line_size);
+            match_settings.min_group_size =
+                settings.min_group_size.or(match_settings.min_group_size);
+            match_settings.merge_neighbours = settings
+                .merge_neighbours
+                .unwrap_or(match_settings.merge_neighbours);
+
+            if settings.merge_neighbours.is_none() {
+                match_settings.merge_neighbours = false;
+                let mut cloned = match_settings.clone();
+                settings_variations.push(("(with merge_neighbours = false)", match_settings));
+                cloned.merge_neighbours = true;
+                settings_variations.push(("(with merge_neighbours = true)", cloned));
+            } else {
+                settings_variations.push(("", match_settings));
+            }
+
+            let _ = lines.next();
+        } else {
+            settings_variations.push(("(with merge_neighbours = false)", {
+                let mut s = S::common_match3();
+                s.merge_neighbours = false;
+                s
+            }));
+            settings_variations.push(("(with merge_neighbours = true)", {
+                let mut s = S::common_match3();
+                s.merge_neighbours = true;
+                s
+            }));
+        }
+    } else {
+        panic!("Board is empty")
+    }
+    let board = board_from_str(&lines.join("\n"));
+
+    let variants = settings_variations
+        .into_iter()
+        .map(|(settings_name, settings)| {
+            let board = board.clone();
+            let matches = board.find_matches(settings);
+            (
+                settings_name,
+                visualize_snapshot(name.to_string(), board, matches, false),
+            )
+        })
+        .collect::<Vec<(&'static str, String)>>();
+
+    for i in 1..variants.len() {
+        assert_eq!(
+            variants[i].1, variants[0].1,
+            "Got different results with {} and {}",
+            variants[i].0, variants[0].0
+        );
+    }
+
+    let file_name = path
+        .file_name()
+        .expect("Cases should have a file name")
+        .to_string_lossy()
+        .to_string();
+
+    assert_snapshot!(file_name, variants[0].1);
 }
 
 fn color_char(c: char) -> String {
@@ -154,14 +229,12 @@ pub fn common_line3_file_tests(#[files("src/cases/*.txt")] path: PathBuf) {
         .to_string_lossy()
         .to_string();
 
-    let (name, board) = board_from_path(path);
-    let matches = board.find_matches(S::common_match3());
-    assert_snapshot!(file_name, visualize_snapshot(name, board, matches, false));
+    check_path("common", path);
 }
 
 #[test]
 pub fn test_dev() {
-    let b = board_from_str("grrrb");
+    let b = board_from_str("rrr\nr-r\nrrr");
     let matches = b.find_matches(S::common_match3());
     visualize_snapshot("DEV".to_string(), b, matches, false);
 }

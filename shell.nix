@@ -37,7 +37,7 @@ in mkShell.override {
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${lib.makeLibraryPath dlopen-libs}"
     # export VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation
     # export XDG_DATA_DIRS="$XDG_DATA_DIRS:${vulkan-validation-layers}/share"
-    export RUST_LOG=client=trace,server=trace,common=trace,vulkan=info
+    export RUST_LOG=match3=trace,scrap3=trace
     pre-commit install
   '';
 }

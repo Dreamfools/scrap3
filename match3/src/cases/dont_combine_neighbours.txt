@@ -1,0 +1,4 @@
+Should not combine neighboring groups when merge_neighbours=false
+{merge_neighbours: false}
+rrr--
+--rrr

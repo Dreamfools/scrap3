@@ -1,0 +1,20 @@
+---
+source: match3/src/tests.rs
+expression: "visualize_snapshot(name, board, matches, false)"
+---
+Should combine neighboring groups when merge_neighbours=true
+Board: 
+╭─────╮
+│rrr--│
+│--rrr│
+╰─────╯
+Match #0:
+╭─────╮
+│rrr  │
+│  rrr│
+╰─────╯
+Remaining cells:
+╭─────╮
+│   --│
+│--   │
+╰─────╯
