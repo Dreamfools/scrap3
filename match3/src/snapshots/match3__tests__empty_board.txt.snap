@@ -1,0 +1,14 @@
+---
+source: match3/src/tests.rs
+expression: "visualize_snapshot(name, board, matches, false)"
+---
+Empty Board
+Board: 
+╭─────╮
+│-----│
+│-----│
+│-----│
+│-----│
+│-----│
+╰─────╯
+No matches

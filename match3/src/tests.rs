@@ -8,6 +8,7 @@ use ndshape::RuntimeShape;
 use nohash_hasher::IntSet;
 use rstest::rstest;
 use std::fmt::Debug;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
 struct CharGem(char);
@@ -59,6 +60,14 @@ fn board_from_str(board: &str) -> CharBoard {
         })
         .collect();
     CharBoard::new(shape, board)
+}
+
+fn board_from_path(path: impl AsRef<Path>) -> (String, CharBoard) {
+    let test = std::fs::read_to_string(path).unwrap();
+    let mut lines = test.lines();
+    let name = lines.next().expect("Should have name").trim();
+    let board = lines.join("\n");
+    (name.to_string(), board_from_str(&board))
 }
 
 fn color_char(c: char) -> String {
@@ -138,15 +147,14 @@ fn visualize_snapshot(
 }
 
 #[rstest]
-#[case("Horizontal line", "rrr")]
-#[case("Vertical line", "r\nr\nr")]
-#[case("Incomplete horizontal line", "rr-")]
-#[case("Incomplete vertical line", "r\nr\n-")]
-pub fn common_line3_tests(#[case] name: String, #[case] board: String) {
-    let board = board_from_str(&board);
+pub fn common_line3_file_tests(#[files("src/cases/**/*.txt")] path: PathBuf) {
+    let file_name = path
+        .file_name()
+        .expect("All cases should have a file name")
+        .to_string_lossy()
+        .to_string();
+
+    let (name, board) = board_from_path(path);
     let matches = board.find_matches(S::common_match3());
-    assert_snapshot!(
-        name.clone(),
-        visualize_snapshot(name, board, matches, false)
-    );
+    assert_snapshot!(file_name, visualize_snapshot(name, board, matches, false));
 }
