@@ -130,6 +130,7 @@ impl<
             self.match_cells_cache = Some(group.cells);
             return;
         }
+
         /// Check for intersection with other groups and merge them
         fn check_merge_groups_at_cell<Color: MatchColor>(
             matches: &mut [Option<LinesBoardMatch<Color>>],
@@ -148,17 +149,21 @@ impl<
                     if !other_group.color.matches(&group.color) {
                         return;
                     }
-                    if merge_group.is_none() {
+                    if let Some(group) = merge_group {
+                        if group == &intersecting {
+                            return;
+                        }
+                        // We already found a group to merge into, so add this matching group to merge in at a later stage
+                        groups_to_merge.insert(intersecting);
+                    } else {
                         // We intersect with the first matching group, so merge the current group into that one
                         other_group.cells.extend(&group.cells);
                         *merge_group = Some(intersecting);
-                    } else {
-                        // We already found a group to merge into, so add this matching group to merge in at a later stage
-                        groups_to_merge.insert(intersecting);
                     }
                 }
             }
         }
+
         let mut merge_group: Option<MatchIndex> = None;
         let mut groups_to_merge = BTreeSet::<MatchIndex>::new();
 

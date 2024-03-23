@@ -1,0 +1,29 @@
+---
+source: match3/src/tests.rs
+expression: "visualize_snapshot(name, board, matches, false)"
+---
+Should combine intersecting groups
+Board: 
+╭─────╮
+│-r-r-│
+│rrrrr│
+│-r-r-│
+│rrrrr│
+│-r-r-│
+╰─────╯
+Match #0:
+╭─────╮
+│ r r │
+│rrrrr│
+│ r r │
+│rrrrr│
+│ r r │
+╰─────╯
+Remaining cells:
+╭─────╮
+│- - -│
+│     │
+│- - -│
+│     │
+│- - -│
+╰─────╯

@@ -1,0 +1,6 @@
+Should combine intersecting groups
+-r-r-
+rrrrr
+-r-r-
+rrrrr
+-r-r-
