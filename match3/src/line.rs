@@ -1,20 +1,8 @@
-use crate::MatchColor;
+use crate::{BoardMatch, MatchColor};
 use nohash_hasher::{IntMap, IsEnabled};
 use smallvec::SmallVec;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
-
-#[derive(Debug)]
-pub struct LinesBoardMatch<Color: MatchColor> {
-    pub color: Color,
-    pub cells: Vec<usize>,
-}
-
-impl<Color: MatchColor> LinesBoardMatch<Color> {
-    pub fn new(color: Color, cells: Vec<usize>) -> Self {
-        Self { color, cells }
-    }
-}
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 struct MatchIndex(usize);
@@ -66,7 +54,7 @@ impl LineMatcherSettings {
         cells: &'a [Gem],
         lines: &'a [Line],
         neighbours: &'a [Neighbours],
-    ) -> Vec<LinesBoardMatch<Color>> {
+    ) -> Vec<BoardMatch<Color>> {
         let state = LineMatcherState::new(self.clone(), cells, lines, neighbours);
         state.find_matches()
     }
@@ -86,7 +74,7 @@ struct LineMatcherState<
     lines: &'a [Line],
     neighbours: &'a [Neighbours],
 
-    matches: Vec<Option<LinesBoardMatch<Color>>>,
+    matches: Vec<Option<BoardMatch<Color>>>,
     match_board: IntMap<usize, SmallVec<[MatchIndex; 1]>>,
 
     match_cells_cache: Option<Vec<usize>>,
@@ -117,14 +105,14 @@ impl<
         }
     }
 
-    fn find_matches(mut self) -> Vec<LinesBoardMatch<Color>> {
+    fn find_matches(mut self) -> Vec<BoardMatch<Color>> {
         for line in self.lines {
             self.match_line(line.as_ref());
         }
         self.matches.into_iter().flatten().collect()
     }
 
-    fn close_match(&mut self, mut group: LinesBoardMatch<Color>) {
+    fn close_match(&mut self, mut group: BoardMatch<Color>) {
         if group.cells.len() < self.settings.line_size {
             group.cells.clear();
             self.match_cells_cache = Some(group.cells);
@@ -133,9 +121,9 @@ impl<
 
         /// Check for intersection with other groups and merge them
         fn check_merge_groups_at_cell<Color: MatchColor>(
-            matches: &mut [Option<LinesBoardMatch<Color>>],
+            matches: &mut [Option<BoardMatch<Color>>],
             match_board: &IntMap<usize, SmallVec<[MatchIndex; 1]>>,
-            group: &mut LinesBoardMatch<Color>,
+            group: &mut BoardMatch<Color>,
             cell: usize,
             merge_group: &mut Option<MatchIndex>,
             groups_to_merge: &mut BTreeSet<MatchIndex>,
@@ -295,7 +283,7 @@ impl<
     }
 
     fn match_line(&mut self, line: &[usize]) {
-        let mut current_match: Option<LinesBoardMatch<Color>> = None;
+        let mut current_match: Option<BoardMatch<Color>> = None;
         let mut was_wildcard = false;
         for i in 0..line.len() {
             let pos = line[i];
@@ -314,7 +302,7 @@ impl<
             }
 
             if current_match.is_none() && can_start_match && can_be_matched {
-                let mut group = LinesBoardMatch::<Color>::new(
+                let mut group = BoardMatch::<Color>::new(
                     gem.clone(),
                     std::mem::take(&mut self.match_cells_cache).unwrap_or_default(),
                 );

@@ -1,6 +1,6 @@
-use crate::line::{LineMatcherSettings, LinesBoardMatch};
+use crate::line::LineMatcherSettings;
 use crate::rect_board::RectBoard;
-use crate::MatchColor;
+use crate::{BoardMatch, MatchColor};
 use colored::Colorize;
 use insta::assert_snapshot;
 use itertools::Itertools;
@@ -122,7 +122,7 @@ fn check_path(prefix: &str, path: impl AsRef<Path>) {
         .into_iter()
         .map(|(settings_name, settings)| {
             let board = board.clone();
-            let matches = board.find_matches(settings);
+            let matches = board.find_matches_linear(settings);
             (
                 settings_name,
                 visualize_snapshot(name.to_string(), board, matches, false),
@@ -206,7 +206,7 @@ fn display(board: &CharBoard, colored: bool) -> String {
 fn visualize_snapshot(
     name: String,
     mut board: CharBoard,
-    mut matches: Vec<LinesBoardMatch<CharGem>>,
+    mut matches: Vec<BoardMatch<CharGem>>,
     colored: bool,
 ) -> String {
     let mut text = format!("{name}\nBoard: \n");
@@ -288,7 +288,7 @@ w*b
     let mut settings = S::common_match3();
     settings.merge_neighbours = false;
     settings.line_size = 2;
-    let matches = b.find_matches(settings);
+    let matches = b.find_matches_linear(settings);
     visualize_snapshot("DEV".to_string(), b, matches, false);
 }
 
@@ -296,7 +296,7 @@ w*b
 fn random_tests() {
     let mut runner = TestRunner::default();
     let run_result = runner.run(&prop_board(64), |board| {
-        let matches = board.find_matches(S::common_match3());
+        let matches = board.find_matches_linear(S::common_match3());
         let mut cloned = board.clone();
         for m in &matches {
             for &x in &m.cells {

@@ -32,6 +32,18 @@ pub trait MatchColor: Clone + Default {
     }
 }
 
+#[derive(Debug)]
+pub struct BoardMatch<Color: MatchColor> {
+    pub color: Color,
+    pub cells: Vec<usize>,
+}
+
+impl<Color: MatchColor> BoardMatch<Color> {
+    pub fn new(color: Color, cells: Vec<usize>) -> Self {
+        Self { color, cells }
+    }
+}
+
 /// Get two mutable references to two elements in a slice
 ///
 /// # Panics

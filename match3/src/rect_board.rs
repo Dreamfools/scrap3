@@ -1,5 +1,5 @@
-use crate::line::{LineMatcherSettings, LinesBoardMatch};
-use crate::MatchColor;
+use crate::line::LineMatcherSettings;
+use crate::{BoardMatch, MatchColor};
 use ndshape::{RuntimeShape, Shape};
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
@@ -75,7 +75,7 @@ impl<T: AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
         }
     }
 
-    pub fn find_matches(&self, settings: LineMatcherSettings) -> Vec<LinesBoardMatch<Color>> {
+    pub fn find_matches_linear(&self, settings: LineMatcherSettings) -> Vec<BoardMatch<Color>> {
         settings.find_matches(&self.board, &self.lines, &self.neighbours)
     }
 
