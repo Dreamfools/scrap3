@@ -1,0 +1,17 @@
+---
+source: match3/src/tests.rs
+expression: "visualize_snapshot(name, board, matches, false)"
+---
+Horizontal line
+Board: 
+╭───╮
+│rrr│
+╰───╯
+Match #0:
+╭───╮
+│rrr│
+╰───╯
+Remaining cells:
+╭───╮
+│   │
+╰───╯
