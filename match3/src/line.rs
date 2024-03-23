@@ -273,6 +273,7 @@ impl<
             let gem = self.cells[pos].as_ref();
             let can_start_match = gem.can_start_match();
             let can_be_matched = !gem.hint_is_unmatchable();
+
             if let Some(ref mut match_group) = current_match {
                 if !match_group.color.matches(gem) {
                     let group = std::mem::take(&mut current_match)
@@ -281,7 +282,9 @@ impl<
                 } else {
                     match_group.cells.push(pos);
                 }
-            } else if can_start_match && can_be_matched {
+            }
+
+            if current_match.is_none() && can_start_match && can_be_matched {
                 let mut group = LinesBoardMatch::<Color>::new(
                     gem.clone(),
                     std::mem::take(&mut self.match_cells_cache).unwrap_or_default(),
