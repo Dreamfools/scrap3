@@ -1,0 +1,6 @@
+Should not cause overflow
+bbb-
+--b-
+w**b
+-bbb
+-bbb

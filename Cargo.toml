@@ -5,7 +5,7 @@ default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
-arbitrary = "1.3.2"
+regex = "1.0.0"
 colored = "2.1.0"
 comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "13f4ac09fc9b664ec32b67b98bbb950c71269cb6" }
 insta = "1.36.1"

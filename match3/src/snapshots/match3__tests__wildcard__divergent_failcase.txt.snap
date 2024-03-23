@@ -1,0 +1,37 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should not have divergent merging behavior
+Board: 
+╭────╮
+│b**-│
+│--*-│
+│w**b│
+│-bbb│
+│-b--│
+╰────╯
+Match #0 - b:
+╭────╮
+│b** │
+│  * │
+│ **b│
+│ bbb│
+│ b  │
+╰────╯
+Match #1 - w:
+╭────╮
+│    │
+│    │
+│w** │
+│    │
+│    │
+╰────╯
+Remaining cells:
+╭────╮
+│   -│
+│-- -│
+│    │
+│-   │
+│- --│
+╰────╯

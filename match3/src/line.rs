@@ -134,7 +134,7 @@ impl<
         /// Check for intersection with other groups and merge them
         fn check_merge_groups_at_cell<Color: MatchColor>(
             matches: &mut [Option<LinesBoardMatch<Color>>],
-            match_board: IntMap<usize, SmallVec<[MatchIndex; 1]>>,
+            match_board: &IntMap<usize, SmallVec<[MatchIndex; 1]>>,
             group: &mut LinesBoardMatch<Color>,
             cell: usize,
             merge_group: &mut Option<MatchIndex>,
@@ -147,11 +147,11 @@ impl<
                         .as_mut()
                         .expect("All dead groups should be inaccessible from the board");
                     if !other_group.color.matches(&group.color) {
-                        return;
+                        continue;
                     }
                     if let Some(group) = merge_group {
                         if group == &intersecting {
-                            return;
+                            continue;
                         }
                         // We already found a group to merge into, so add this matching group to merge in at a later stage
                         groups_to_merge.insert(intersecting);
@@ -172,7 +172,7 @@ impl<
             let cell = group.cells[i];
             check_merge_groups_at_cell(
                 &mut self.matches,
-                self.match_board.clone(),
+                &self.match_board,
                 &mut group,
                 cell,
                 &mut merge_group,
@@ -193,7 +193,7 @@ impl<
                 for &neighbour in self.neighbours[cell].as_ref() {
                     check_merge_groups_at_cell(
                         &mut self.matches,
-                        self.match_board.clone(),
+                        &self.match_board,
                         &mut group,
                         neighbour,
                         &mut merge_group,
@@ -204,14 +204,11 @@ impl<
         }
 
         if let Some(merged) = merge_group {
-            group.cells.clear();
-            self.match_cells_cache = Some(group.cells);
-            for &x in &self.matches[merged.0]
-                .as_ref()
-                .expect("Merge group was checked for already")
-                .cells
-            {
-                self.match_board.entry(x).or_default().push(merged)
+            for &x in &group.cells {
+                let groups = self.match_board.entry(x).or_default();
+                if !groups.contains(&merged) {
+                    groups.push(merged)
+                }
             }
 
             // Merge group exists, which mean the current group is already
@@ -229,12 +226,25 @@ impl<
                         .match_board
                         .get_mut(cell)
                         .expect("Cell should already be initialized by the previous group");
-                    if groups[groups.len() - 1] == merged {
-                        groups.pop();
+
+                    #[cfg(debug_assertions)]
+                    if groups.is_empty() {
+                        panic!(
+                            "Something gone extremely wrong\ngroup: {:?}\nmatch_groups: {:?}\ngroup: {:?}",
+                            merged, self.match_board, group.cells
+                        );
                     }
-                    for x in groups {
+
+                    let mut remove_after = groups.len() - 1;
+                    for (i, x) in groups.iter_mut().enumerate() {
                         if x == &other_group_idx {
                             *x = merged;
+                            remove_after = i;
+                        }
+                    }
+                    for i in ((remove_after + 1)..groups.len()).rev() {
+                        if groups[i] == merged {
+                            groups.remove(i);
                         }
                     }
                 }
@@ -254,6 +264,20 @@ impl<
                     }
                 }
             }
+
+            #[cfg(debug_assertions)]
+            {
+                for (idx, groups) in self.match_board.iter() {
+                    for i in 0..(groups.len() - 1) {
+                        if groups[(i + 1)..].contains(&groups[i]) {
+                            panic!("Cell {} has bad groups composition: {:?}", idx, groups)
+                        }
+                    }
+                }
+            }
+
+            group.cells.clear();
+            self.match_cells_cache = Some(group.cells);
         } else {
             debug_assert!(
                 groups_to_merge.is_empty(),

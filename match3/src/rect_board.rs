@@ -26,21 +26,19 @@ impl<T: Debug + AsRef<Color>, Color: MatchColor> Debug for RectBoard<T, Color> {
 
 impl<T: Copy + AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
     pub fn from_element(width: usize, height: usize, filler: impl Into<T>) -> Self {
-        let shape = RuntimeShape::<usize, 2>::new([width, height]);
-        let board = vec![filler.into(); shape.size()];
-        Self::new(shape, board)
+        let board = vec![filler.into(); width * height];
+        Self::new(width, height, board)
     }
 }
 
 impl<T: AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
     pub fn from_fn(width: usize, height: usize, filler: impl Fn(usize) -> T) -> Self {
-        let shape = RuntimeShape::<usize, 2>::new([width, height]);
-        let board = (0..shape.size()).map(|i| filler(i)).collect();
-        Self::new(shape, board)
+        let board = (0..(width * height)).map(filler).collect();
+        Self::new(width, height, board)
     }
 
-    pub fn new(shape: RuntimeShape<usize, 2>, board: Vec<T>) -> Self {
-        let [width, height] = shape.as_array();
+    pub fn new(width: usize, height: usize, board: Vec<T>) -> Self {
+        let shape = RuntimeShape::<usize, 2>::new([width, height]);
         let mut lines: Vec<Vec<usize>> = vec![];
         let mut neighbours: Vec<Vec<usize>> = vec![];
         for y in 0..height {

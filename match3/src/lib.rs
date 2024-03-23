@@ -1,8 +1,4 @@
-use nohash_hasher::{IntMap, IntSet, IsEnabled};
-use smallvec::SmallVec;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
-use std::hash::{Hash, Hasher};
 
 #[cfg(test)]
 mod tests;
@@ -32,7 +28,7 @@ pub trait MatchColor: Clone + Default {
     /// ignore it, so the actual matching logic should be handled by the
     /// [matches] and [can_start_match] methods
     fn hint_is_unmatchable(&self) -> bool {
-        return false;
+        false
     }
 }
 

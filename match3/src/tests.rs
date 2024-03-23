@@ -4,10 +4,13 @@ use crate::MatchColor;
 use colored::Colorize;
 use insta::assert_snapshot;
 use itertools::Itertools;
-use ndshape::RuntimeShape;
+use ndshape::Shape;
 use nohash_hasher::IntSet;
+use proptest::prelude::{Just, Strategy};
+use proptest::test_runner::{TestError, TestRunner};
 use rstest::rstest;
 use serde::Deserialize;
+use std::borrow::Cow;
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 
@@ -20,11 +23,11 @@ impl MatchColor for CharGem {
     }
 
     fn can_start_match(&self) -> bool {
-        self.0 != '*' && self.0 != '-'
+        self.0 != '*' && self.0 != '-' && self.0 != ' '
     }
 
     fn hint_is_unmatchable(&self) -> bool {
-        self.0 == '-'
+        self.0 == '-' || self.0 == ' '
     }
 }
 
@@ -47,7 +50,6 @@ fn board_from_str(board: &str) -> CharBoard {
     let lines: Vec<&str> = board.lines().map(|l| l.trim()).collect();
     let height = lines.len();
     let width = lines[0].len();
-    let shape = RuntimeShape::<usize, 2>::new([width, height]);
     let board = lines
         .into_iter()
         .enumerate()
@@ -60,7 +62,7 @@ fn board_from_str(board: &str) -> CharBoard {
             line.chars().map(CharGem::from)
         })
         .collect();
-    CharBoard::new(shape, board)
+    CharBoard::new(width, height, board)
 }
 
 #[derive(Deserialize)]
@@ -159,6 +161,23 @@ fn color_char(c: char) -> String {
     }
 }
 
+fn display_raw(board: &CharBoard, colored: bool) -> String {
+    board
+        .board
+        .iter()
+        .map(|c| {
+            if colored {
+                color_char(c.0)
+            } else {
+                c.0.to_string()
+            }
+        })
+        .chunks(board.width())
+        .into_iter()
+        .map(|mut line| line.join("").to_string())
+        .join("\n")
+}
+
 fn display(board: &CharBoard, colored: bool) -> String {
     let body = board
         .board
@@ -226,18 +245,100 @@ fn visualize_snapshot(
 }
 
 #[rstest]
-pub fn common_line3_file_tests(#[files("src/cases/common/*.txt")] path: PathBuf) {
+fn common_line3_file_tests(#[files("src/cases/common/*.txt")] path: PathBuf) {
     check_path("common", path);
 }
 
 #[rstest]
-pub fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf) {
+fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf) {
     check_path("wildcard", path);
 }
 
+fn prop_board(size: usize) -> impl Strategy<Value = CharBoard> {
+    (3..size, 3..size)
+        .prop_flat_map(|(width, height)| {
+            let size = width * height;
+            (
+                Just(width),
+                Just(height),
+                proptest::collection::vec(
+                    proptest::char::ranges(Cow::Borrowed(&[
+                        'r'..='r',
+                        'g'..='g',
+                        'b'..='b',
+                        'w'..='w',
+                        'p'..='p',
+                        '*'..='*',
+                    ])),
+                    size,
+                )
+                .prop_map(|c| c.into_iter().map(CharGem).collect_vec()),
+            )
+        })
+        .prop_map(|(w, h, board)| CharBoard::new(w, h, board))
+}
+
 #[test]
-pub fn test_dev() {
-    let b = board_from_str("rrr\nr-r\nrrr");
-    let matches = b.find_matches(S::common_match3());
+fn test_dev() {
+    let b = board_from_str(
+        "\
+w*b
+-bb",
+    );
+    let mut settings = S::common_match3();
+    settings.merge_neighbours = false;
+    settings.line_size = 2;
+    let matches = b.find_matches(settings);
     visualize_snapshot("DEV".to_string(), b, matches, false);
+}
+
+#[test]
+fn random_tests() {
+    let mut runner = TestRunner::default();
+    let run_result = runner.run(&prop_board(64), |board| {
+        let matches = board.find_matches(S::common_match3());
+        let mut cloned = board.clone();
+        for m in &matches {
+            for &x in &m.cells {
+                cloned.board[x].0 = ' '
+            }
+        }
+        if let Some(err) = check_straight_matches(&cloned) {
+            let visualized = visualize_snapshot(err, board, matches, false);
+            panic!("{}", visualized)
+        }
+
+        Ok(())
+    });
+    match run_result {
+        Ok(_) => {}
+        Err(TestError::Abort(reason)) => {
+            panic!("{}", reason)
+        }
+        Err(TestError::Fail(reason, board)) => {
+            panic!("{}:\n{}", reason, display_raw(&board, false))
+        }
+    }
+    // panic!("")
+}
+
+fn check_straight_matches(board: &CharBoard) -> Option<String> {
+    let s = &board.shape;
+    let b = &board.board;
+    let [w, h] = s.as_array();
+    for y in 0..h {
+        for x in 0..w {
+            let i = s.linearize([x, y]);
+            if !b[i].can_start_match() {
+                continue;
+            }
+            if x < w - 2 && b[i] == b[i + 1] && b[i] == b[i + 2] {
+                return Some(format!("Unmatched horizontal group at x={x}, y={y}"));
+            }
+            if y < h - 2 && b[i] == b[i + w] && b[i] == b[i + w * 2] {
+                return Some(format!("Unmatched vertical group at x={x}, y={y}"));
+            }
+        }
+    }
+    None
 }

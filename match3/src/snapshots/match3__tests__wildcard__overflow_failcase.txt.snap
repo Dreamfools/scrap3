@@ -1,0 +1,37 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should not cause overflow
+Board: 
+╭────╮
+│bbb-│
+│--b-│
+│w**b│
+│-bbb│
+│-bbb│
+╰────╯
+Match #0 - b:
+╭────╮
+│bbb │
+│  b │
+│ **b│
+│ bbb│
+│ bbb│
+╰────╯
+Match #1 - w:
+╭────╮
+│    │
+│    │
+│w** │
+│    │
+│    │
+╰────╯
+Remaining cells:
+╭────╮
+│   -│
+│-- -│
+│    │
+│-   │
+│-   │
+╰────╯

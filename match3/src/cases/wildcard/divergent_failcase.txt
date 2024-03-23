@@ -1,0 +1,6 @@
+Should not have divergent merging behavior
+b**-
+--*-
+w**b
+-bbb
+-b--
