@@ -208,7 +208,11 @@ fn visualize_snapshot(
                     *x = CharGem(' ');
                 }
             }
-            text += &format!("\nMatch #{i}:\n{}", display(&cloned, colored));
+            text += &format!(
+                "\nMatch #{i} - {}:\n{}",
+                m.color.0,
+                display(&cloned, colored)
+            );
             to_remove.extend(&m.cells);
         }
         for (i, x) in board.board.iter_mut().enumerate() {

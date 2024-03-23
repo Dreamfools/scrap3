@@ -9,31 +9,31 @@ Board:
 │ygggw│
 │ybbbw│
 ╰─────╯
-Match #0:
+Match #0 - y:
 ╭─────╮
 │y    │
 │y    │
 │y    │
 ╰─────╯
-Match #1:
+Match #1 - r:
 ╭─────╮
 │ rrr │
 │     │
 │     │
 ╰─────╯
-Match #2:
+Match #2 - w:
 ╭─────╮
 │    w│
 │    w│
 │    w│
 ╰─────╯
-Match #3:
+Match #3 - g:
 ╭─────╮
 │     │
 │ ggg │
 │     │
 ╰─────╯
-Match #4:
+Match #4 - b:
 ╭─────╮
 │     │
 │     │
