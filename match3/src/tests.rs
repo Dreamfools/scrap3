@@ -280,12 +280,8 @@ fn prop_board(size: usize) -> impl Strategy<Value = CharBoard> {
 
 #[test]
 fn test_dev() {
-    let b = board_from_str(
-        "\
-w*b
--bb",
-    );
-    let mut settings = S::common_match3();
+    let b = board_from_str("rr*g");
+    let settings = S::common_match3();
     // settings.merge_neighbours = false;
     // settings.line_size = 2;
     let matches = b.find_matches_linear(settings);

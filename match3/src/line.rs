@@ -321,6 +321,15 @@ impl<
                     }
                 }
 
+                if group.cells.len() + 1 // actual group size
+                    + line.len() - i - 1 // remaining space
+                    < self.settings.line_size
+                {
+                    group.cells.clear();
+                    self.match_cells_cache = Some(group.cells);
+                    break;
+                }
+
                 group.cells.push(pos);
 
                 current_match = Some(group);
