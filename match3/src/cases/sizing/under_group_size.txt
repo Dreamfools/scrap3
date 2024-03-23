@@ -1,0 +1,4 @@
+Should not match small group under the size requirement
+{line_size: 2, min_group_size: 4}
+-rr
+-r-

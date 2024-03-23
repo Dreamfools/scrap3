@@ -254,6 +254,11 @@ fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf)
     check_path("wildcard", path);
 }
 
+#[rstest]
+fn sizing_line3_file_tests(#[files("src/cases/sizing/*.txt")] path: PathBuf) {
+    check_path("sizing", path);
+}
+
 fn prop_board(size: usize) -> impl Strategy<Value = CharBoard> {
     (3..size, 3..size)
         .prop_flat_map(|(width, height)| {

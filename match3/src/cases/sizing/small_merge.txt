@@ -1,0 +1,4 @@
+Should merge groups with small line size
+{line_size: 2}
+-rr
+rr-

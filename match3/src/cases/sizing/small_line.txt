@@ -1,0 +1,3 @@
+Should match small line
+{line_size: 2}
+-rr-

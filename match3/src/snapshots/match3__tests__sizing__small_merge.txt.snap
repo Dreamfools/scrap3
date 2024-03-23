@@ -1,0 +1,20 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should merge groups with small line size
+Board: 
+╭───╮
+│-rr│
+│rr-│
+╰───╯
+Match #0 - r:
+╭───╮
+│ rr│
+│rr │
+╰───╯
+Remaining cells:
+╭───╮
+│-  │
+│  -│
+╰───╯

@@ -1,0 +1,17 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should match small line
+Board: 
+╭────╮
+│-rr-│
+╰────╯
+Match #0 - r:
+╭────╮
+│ rr │
+╰────╯
+Remaining cells:
+╭────╮
+│-  -│
+╰────╯

@@ -1,0 +1,11 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Should not match small group under the size requirement
+Board: 
+╭───╮
+│-rr│
+│-r-│
+╰───╯
+No matches
