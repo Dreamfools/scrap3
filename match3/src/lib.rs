@@ -3,9 +3,9 @@ use std::cmp::Ordering;
 #[cfg(test)]
 mod tests;
 
-mod line;
+pub mod line;
 
-mod rect_board;
+pub mod rect_board;
 
 /// Match colors are assumed to be cheap to clone and instantiate my matching
 /// algorithms
