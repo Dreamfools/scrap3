@@ -31,3 +31,7 @@ lto = "off"
 # Enable high optimizations for dependencies, but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+
+[profile.bench]
+debug = true
+strip = false

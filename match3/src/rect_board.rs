@@ -75,7 +75,7 @@ impl<T: AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
         }
     }
 
-    pub fn find_matches_linear(&self, settings: LineMatcherSettings) -> Vec<BoardMatch<Color>> {
+    pub fn find_matches_linear(&self, settings: &LineMatcherSettings) -> Vec<BoardMatch<Color>> {
         settings.find_matches(&self.board, &self.lines, &self.neighbours)
     }
 

@@ -1,7 +1,10 @@
 use std::cmp::Ordering;
 
 #[cfg(test)]
-mod tests;
+pub mod tests;
+
+#[cfg(feature = "char-board")]
+pub mod char_board;
 
 pub mod line;
 

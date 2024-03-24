@@ -28,6 +28,7 @@ in mkShell.override {
           pkgs.cargo-machete
           pkgs.cargo-depgraph
           pkgs.cargo-limit
+          pkgs.cargo-flamegraph
           pkgs.pre-commit
   ];
   shellHook = ''

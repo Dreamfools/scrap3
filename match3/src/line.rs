@@ -37,6 +37,21 @@ impl LineMatcherSettings {
         }
     }
 
+    pub fn with_line_size(mut self, line_size: usize) -> Self {
+        self.line_size = line_size;
+        self
+    }
+
+    pub fn with_min_group_size(mut self, min_group_size: impl Into<Option<usize>>) -> Self {
+        self.min_group_size = min_group_size.into();
+        self
+    }
+
+    pub fn with_merge_neighbours(mut self, merge_neighbours: bool) -> Self {
+        self.merge_neighbours = merge_neighbours;
+        self
+    }
+
     /// Common match-3 settings, with 3-in-a-row matches and no neighboring
     /// groups merging
     pub fn common_match3() -> Self {
