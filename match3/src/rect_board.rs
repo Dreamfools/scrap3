@@ -1,20 +1,19 @@
 use crate::line::LineMatcherSettings;
-use crate::{BoardMatch, MatchColor};
+use crate::{BoardMatch, Gem, MatchColor};
 use ndshape::{RuntimeShape, Shape};
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct RectBoard<T: AsRef<Color>, Color: MatchColor> {
+pub struct RectBoard<T: Gem> {
     pub shape: RuntimeShape<usize, 2>,
     pub board: Vec<T>,
     pub lines: Arc<Vec<Vec<usize>>>,
     pub neighbours: Arc<Vec<Vec<usize>>>,
-    _color: PhantomData<Color>,
 }
 
-impl<T: Debug + AsRef<Color>, Color: MatchColor> Debug for RectBoard<T, Color> {
+impl<T: Debug + Gem> Debug for RectBoard<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CharBoard")
             .field("width", &self.shape.as_array()[0])
@@ -24,14 +23,14 @@ impl<T: Debug + AsRef<Color>, Color: MatchColor> Debug for RectBoard<T, Color> {
     }
 }
 
-impl<T: Copy + AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
+impl<T: Copy + Gem> RectBoard<T> {
     pub fn from_element(width: usize, height: usize, filler: impl Into<T>) -> Self {
         let board = vec![filler.into(); width * height];
         Self::new(width, height, board)
     }
 }
 
-impl<T: AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
+impl<T: Gem> RectBoard<T> {
     pub fn from_fn(width: usize, height: usize, filler: impl Fn(usize) -> T) -> Self {
         let board = (0..(width * height)).map(filler).collect();
         Self::new(width, height, board)
@@ -71,11 +70,10 @@ impl<T: AsRef<Color>, Color: MatchColor> RectBoard<T, Color> {
             board,
             lines: Arc::new(lines),
             neighbours: Arc::new(neighbours),
-            _color: Default::default(),
         }
     }
 
-    pub fn find_matches_linear(&self, settings: &LineMatcherSettings) -> Vec<BoardMatch<Color>> {
+    pub fn find_matches_linear(&self, settings: &LineMatcherSettings) -> Vec<BoardMatch<T::Color>> {
         settings.find_matches(&self.board, &self.lines, &self.neighbours)
     }
 

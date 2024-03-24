@@ -35,6 +35,12 @@ pub trait MatchColor: Clone + Default {
     }
 }
 
+pub trait Gem {
+    type Color: MatchColor;
+
+    fn color(&self) -> Self::Color;
+}
+
 #[derive(Debug)]
 pub struct BoardMatch<Color: MatchColor> {
     pub color: Color,

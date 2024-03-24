@@ -64,18 +64,12 @@ impl LineMatcherSettings {
         Self::new(3, None, false)
     }
 
-    pub fn find_matches<
-        'a,
-        Color: MatchColor,
-        Gem: AsRef<Color>,
-        Line: AsRef<[usize]>,
-        Neighbours: AsRef<[usize]>,
-    >(
+    pub fn find_matches<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>(
         &self,
         cells: &'a [Gem],
         lines: &'a [Line],
         neighbours: &'a [Neighbours],
-    ) -> Vec<BoardMatch<Color>> {
+    ) -> Vec<BoardMatch<Gem::Color>> {
         let state = LineMatcherState::new(self.clone(), cells, lines, neighbours);
         state.find_matches()
     }
@@ -85,32 +79,21 @@ type MatchBoardPool = LinearObjectPool<Vec<SmallVec<[MatchIndex; 1]>>>;
 
 static MATCH_BOARD_POOL: OnceLock<MatchBoardPool> = OnceLock::new();
 
-struct LineMatcherState<
-    'a,
-    Color: MatchColor,
-    Gem: AsRef<Color>,
-    Line: AsRef<[usize]>,
-    Neighbours: AsRef<[usize]>,
-> {
+struct LineMatcherState<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>> {
     settings: LineMatcherSettings,
 
     cells: &'a [Gem],
     lines: &'a [Line],
     neighbours: &'a [Neighbours],
 
-    matches: Vec<Option<BoardMatch<Color>>>,
+    matches: Vec<Option<BoardMatch<Gem::Color>>>,
     match_board: LinearReusable<'static, Vec<SmallVec<[MatchIndex; 1]>>>,
 
     match_cells_cache: Option<Vec<usize>>,
 }
 
-impl<
-        'a,
-        Color: MatchColor,
-        Gem: AsRef<Color>,
-        Line: AsRef<[usize]>,
-        Neighbours: AsRef<[usize]>,
-    > LineMatcherState<'a, Color, Gem, Line, Neighbours>
+impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
+    LineMatcherState<'a, Gem, Line, Neighbours>
 {
     fn new(
         settings: LineMatcherSettings,
@@ -137,7 +120,7 @@ impl<
         }
     }
 
-    fn find_matches(mut self) -> Vec<BoardMatch<Color>> {
+    fn find_matches(mut self) -> Vec<BoardMatch<Gem::Color>> {
         for line in self.lines {
             self.match_line(line.as_ref());
         }
@@ -152,7 +135,7 @@ impl<
             .collect()
     }
 
-    fn close_match(&mut self, mut group: BoardMatch<Color>) {
+    fn close_match(&mut self, mut group: BoardMatch<Gem::Color>) {
         if group.cells.len() < self.settings.line_size {
             group.cells.clear();
             self.match_cells_cache = Some(group.cells);
@@ -332,11 +315,11 @@ impl<
         if line.len() < self.settings.line_size {
             return;
         }
-        let mut current_match: Option<BoardMatch<Color>> = None;
+        let mut current_match: Option<BoardMatch<Gem::Color>> = None;
         let mut was_wildcard = false;
         for i in 0..line.len() {
             let pos = line[i];
-            let gem = self.cells[pos].as_ref();
+            let gem = &self.cells[pos].color();
             let can_start_match = gem.can_start_match();
             let can_be_matched = !gem.hint_is_unmatchable();
 
@@ -351,7 +334,7 @@ impl<
             }
 
             if current_match.is_none() && can_start_match && can_be_matched {
-                let mut group = BoardMatch::<Color>::new(
+                let mut group = BoardMatch::<Gem::Color>::new(
                     gem.clone(),
                     std::mem::take(&mut self.match_cells_cache).unwrap_or_default(),
                 );
@@ -359,7 +342,7 @@ impl<
                 if was_wildcard {
                     for i in (0..i).rev() {
                         let back_pos = line[i];
-                        let back_gem = self.cells[back_pos].as_ref();
+                        let back_gem = &self.cells[back_pos].color();
                         if !group.color.matches(back_gem) {
                             break;
                         }

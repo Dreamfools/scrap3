@@ -1,5 +1,5 @@
 use crate::rect_board::RectBoard;
-use crate::{BoardMatch, MatchColor};
+use crate::{BoardMatch, Gem, MatchColor};
 use colored::Colorize;
 use itertools::Itertools;
 use nohash_hasher::IntSet;
@@ -21,6 +21,14 @@ impl MatchColor for CharGem {
     }
 }
 
+impl Gem for CharGem {
+    type Color = CharGem;
+
+    fn color(&self) -> Self::Color {
+        *self
+    }
+}
+
 impl AsRef<CharGem> for CharGem {
     fn as_ref(&self) -> &CharGem {
         self
@@ -33,7 +41,7 @@ impl From<char> for CharGem {
     }
 }
 
-pub type CharBoard = RectBoard<CharGem, CharGem>;
+pub type CharBoard = RectBoard<CharGem>;
 
 pub fn color_char(c: char) -> String {
     match c {
