@@ -51,7 +51,7 @@ fn bench_board(
     );
 }
 
-fn make_board(width: usize, height: usize) -> RectBoard<CharGem, CharGem> {
+fn make_board(width: usize, height: usize) -> CharBoard {
     CharBoard::from_element(width, height, '-')
 }
 

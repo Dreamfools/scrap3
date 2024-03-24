@@ -8,7 +8,7 @@ use lockfree_object_pool::{LinearObjectPool, LinearReusable};
 use nohash_hasher::IsEnabled;
 use smallvec::SmallVec;
 
-use crate::{BoardMatch, MatchColor};
+use crate::{get_board_match_pool, BoardMatch, MatchColor};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 struct MatchIndex(usize);
@@ -88,8 +88,6 @@ struct LineMatcherState<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: A
 
     matches: Vec<Option<BoardMatch<Gem::Color>>>,
     match_board: LinearReusable<'static, Vec<SmallVec<[MatchIndex; 1]>>>,
-
-    match_cells_cache: Option<Vec<usize>>,
 }
 
 impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
@@ -116,7 +114,6 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
             neighbours,
             matches: Default::default(),
             match_board: board,
-            match_cells_cache: None,
         }
     }
 
@@ -137,8 +134,6 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
 
     fn close_match(&mut self, mut group: BoardMatch<Gem::Color>) {
         if group.cells.len() < self.settings.line_size {
-            group.cells.clear();
-            self.match_cells_cache = Some(group.cells);
             return;
         }
 
@@ -169,7 +164,7 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
                     groups_to_merge.insert(intersecting);
                 } else {
                     // We intersect with the first matching group, so merge the current group into that one
-                    other_group.cells.extend(&group.cells);
+                    other_group.cells.extend(group.cells());
                     *merge_group = Some(intersecting);
                 }
             }
@@ -193,7 +188,6 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
 
         if merge_group.is_none() && group.cells.len() < self.settings.min_group_size.unwrap_or(0) {
             group.cells.clear();
-            self.match_cells_cache = Some(group.cells);
             return;
         }
 
@@ -215,7 +209,7 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
         }
 
         if let Some(merged) = merge_group {
-            for &x in &group.cells {
+            for &x in group.cells() {
                 let groups = &mut self.match_board[x];
                 if !groups.contains(&merged) {
                     groups.push(merged)
@@ -232,14 +226,14 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
                     .expect("Merge group was checked for already");
 
                 // Remap the cells of the other group to the main group
-                for &cell in &other.cells {
+                for &cell in other.cells() {
                     let groups = &mut self.match_board[cell];
 
                     #[cfg(debug_assertions)]
                     if groups.is_empty() {
                         panic!(
                             "Something gone extremely wrong\ngroup: {:?}\nmatch_groups: {:?}\ngroup: {:?}",
-                            merged, self.match_board.iter().map(|x|format!("{:?}", x.deref())).collect_vec(), group.cells
+                            merged, self.match_board.iter().map(|x|format!("{:?}", x.deref())).collect_vec(), group.cells()
                         );
                     }
 
@@ -294,7 +288,6 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
             }
 
             group.cells.clear();
-            self.match_cells_cache = Some(group.cells);
         } else {
             debug_assert!(
                 groups_to_merge.is_empty(),
@@ -303,7 +296,7 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
 
             let index = MatchIndex(self.matches.len());
 
-            for &cell in &group.cells {
+            for &cell in group.cells() {
                 self.match_board[cell].push(index);
             }
 
@@ -334,10 +327,7 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
             }
 
             if current_match.is_none() && can_start_match && can_be_matched {
-                let mut group = BoardMatch::<Gem::Color>::new(
-                    gem.clone(),
-                    std::mem::take(&mut self.match_cells_cache).unwrap_or_default(),
-                );
+                let mut group = BoardMatch::<Gem::Color>::new(gem.clone());
 
                 if was_wildcard {
                     for i in (0..i).rev() {
@@ -355,7 +345,6 @@ impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
                     < self.settings.line_size
                 {
                     group.cells.clear();
-                    self.match_cells_cache = Some(group.cells);
                     break;
                 }
 

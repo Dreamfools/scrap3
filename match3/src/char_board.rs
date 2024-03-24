@@ -147,7 +147,7 @@ pub fn visualize_match(
                 m.color.0,
                 pretty_print_board(&cloned, colored)
             );
-            to_remove.extend(&m.cells);
+            to_remove.extend(m.cells.iter());
         }
         for (i, x) in board.board.iter_mut().enumerate() {
             if to_remove.contains(&i) {

@@ -153,7 +153,7 @@ fn random_tests() {
         let matches = board.find_matches_linear(&settings);
         let mut cloned = board.clone();
         for m in &matches {
-            for &x in &m.cells {
+            for &x in m.cells() {
                 cloned.board[x].0 = ' '
             }
         }

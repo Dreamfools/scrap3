@@ -1,4 +1,8 @@
+use lockfree_object_pool::{LinearObjectPool, LinearReusable};
 use std::cmp::Ordering;
+use std::fmt::{Debug, Formatter};
+use std::ops::Deref;
+use std::sync::OnceLock;
 
 #[cfg(test)]
 pub mod tests;
@@ -12,7 +16,7 @@ pub mod rect_board;
 
 /// Match colors are assumed to be cheap to clone and instantiate my matching
 /// algorithms
-pub trait MatchColor: Clone + Default {
+pub trait MatchColor: Debug + Clone + Default {
     /// Checks whenever two colors are matching
     ///
     /// Implementations of this method must ensure commutative property
@@ -40,16 +44,50 @@ pub trait Gem {
 
     fn color(&self) -> Self::Color;
 }
+pub type BoardMatchPool = LinearObjectPool<Vec<usize>>;
+pub type BoardMatchCells = LinearReusable<'static, Vec<usize>>;
 
-#[derive(Debug)]
+static BOARD_MATCH_POOL: OnceLock<BoardMatchPool> = OnceLock::new();
+
+#[inline]
+pub fn get_board_match_pool() -> &'static BoardMatchPool {
+    BOARD_MATCH_POOL.get_or_init(|| BoardMatchPool::new(|| Default::default(), |v| v.clear()))
+}
+
 pub struct BoardMatch<Color: MatchColor> {
-    pub color: Color,
-    pub cells: Vec<usize>,
+    color: Color,
+    cells: BoardMatchCells,
+}
+
+impl<Color: MatchColor> Debug for BoardMatch<Color> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BoardMatch")
+            .field("color", &self.color)
+            .field("cells", self.cells.deref())
+            .finish()
+    }
 }
 
 impl<Color: MatchColor> BoardMatch<Color> {
-    pub fn new(color: Color, cells: Vec<usize>) -> Self {
+    #[inline]
+    pub fn new(color: Color) -> Self {
+        Self::from_cells(color, get_board_match_pool().pull())
+    }
+    #[inline]
+    pub fn from_cells(color: Color, cells: BoardMatchCells) -> Self {
         Self { color, cells }
+    }
+    #[inline]
+    pub fn color(&self) -> &Color {
+        &self.color
+    }
+    #[inline]
+    pub fn cells(&self) -> &Vec<usize> {
+        &self.cells
+    }
+    #[inline]
+    pub fn cells_mut(&mut self) -> &mut Vec<usize> {
+        &mut self.cells
     }
 }
 
