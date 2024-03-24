@@ -1367,6 +1367,10 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "comfy",
+ "inline_tweak",
+ "match3",
+ "rect",
+ "tinyrand",
 ]
 
 [[package]]
@@ -1659,8 +1663,22 @@ version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6acddbefae08bfba73e27f55513f491f35c365d84bf3002bf85ba9b916c5e5f"
 dependencies = [
+ "inline_tweak_derive",
  "lazy_static",
+ "proc-macro2",
  "rustc-hash",
+ "syn 2.0.53",
+]
+
+[[package]]
+name = "inline_tweak_derive"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46d62a0a3b6af04d4eee8e7251cd758ce74b0ed86253d3e4ac8a1b297a75f4a0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.53",
 ]
 
 [[package]]
@@ -2596,6 +2614,10 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
 ]
+
+[[package]]
+name = "rect"
+version = "0.1.0"
 
 [[package]]
 name = "redox_syscall"

@@ -4,6 +4,8 @@ use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 use std::sync::OnceLock;
 
+pub use ndshape::Shape;
+
 #[cfg(test)]
 pub mod tests;
 
@@ -88,6 +90,17 @@ impl<Color: MatchColor> BoardMatch<Color> {
     #[inline]
     pub fn cells_mut(&mut self) -> &mut Vec<usize> {
         &mut self.cells
+    }
+}
+
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+pub struct SimpleGem<C: MatchColor>(pub C);
+
+impl<C: MatchColor> Gem for SimpleGem<C> {
+    type Color = C;
+
+    fn color(&self) -> Self::Color {
+        self.0.clone()
     }
 }
 

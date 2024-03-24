@@ -7,21 +7,21 @@ edition = "2021"
 [dependencies]
 colored = { workspace = true, optional = true }
 itertools = { workspace = true }
-lockfree-object-pool = "0.1.5"
+lockfree-object-pool = { workspace = true }
 ndshape = { workspace = true }
 nohash-hasher = { workspace = true }
 smallvec = { workspace = true }
 
 [dev-dependencies]
-criterion = { version = "0.5.1", features = ["html_reports"] }
+criterion = { workspace = true, features = ["html_reports"] }
 insta = { workspace = true }
 match3 = { path = ".", features = ["char-board"] }
-proptest = "1.4.0"
+proptest = { workspace = true }
 regex = { workspace = true }
 rstest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json5 = { workspace = true }
-tinyrand = "0.5.0"
+tinyrand = { workspace = true }
 
 [features]
 char-board = ["dep:colored"]

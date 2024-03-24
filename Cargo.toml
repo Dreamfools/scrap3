@@ -1,21 +1,25 @@
 [workspace]
 resolver = "2"
-members = ["game", "match3"]
+members = ["game", "match3", "rect"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
-regex = "1.0.0"
 colored = "2.1.0"
 comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "13f4ac09fc9b664ec32b67b98bbb950c71269cb6" }
+criterion = "0.5.1"
 insta = "1.36.1"
 itertools = "0.12.1"
+lockfree-object-pool = "0.1.5"
 ndshape = "0.3.0"
 nohash-hasher = "0.2.0"
+proptest = "1.4.0"
+regex = "1.0.0"
 rstest = "0.18.2"
-smallvec = "1.13.2"
 serde = "1.0.197"
 serde_json5 = "0.1.0"
+smallvec = "1.13.2"
+tinyrand = "0.5.0"
 
 [profile.release]
 opt-level = 3
