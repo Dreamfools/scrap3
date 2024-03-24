@@ -1,8 +1,14 @@
-use crate::{BoardMatch, MatchColor};
-use nohash_hasher::{IntMap, IsEnabled};
-use smallvec::SmallVec;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
+use std::ops::Deref;
+use std::sync::OnceLock;
+
+use itertools::Itertools;
+use lockfree_object_pool::{LinearObjectPool, LinearReusable};
+use nohash_hasher::IsEnabled;
+use smallvec::SmallVec;
+
+use crate::{BoardMatch, MatchColor};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 struct MatchIndex(usize);
@@ -75,7 +81,10 @@ impl LineMatcherSettings {
     }
 }
 
-#[derive(Debug)]
+type MatchBoardPool = LinearObjectPool<Vec<SmallVec<[MatchIndex; 1]>>>;
+
+static MATCH_BOARD_POOL: OnceLock<MatchBoardPool> = OnceLock::new();
+
 struct LineMatcherState<
     'a,
     Color: MatchColor,
@@ -90,7 +99,7 @@ struct LineMatcherState<
     neighbours: &'a [Neighbours],
 
     matches: Vec<Option<BoardMatch<Color>>>,
-    match_board: Vec<SmallVec<[MatchIndex; 1]>>,
+    match_board: LinearReusable<'static, Vec<SmallVec<[MatchIndex; 1]>>>,
 
     match_cells_cache: Option<Vec<usize>>,
 }
@@ -109,13 +118,21 @@ impl<
         lines: &'a [Line],
         neighbours: &'a [Neighbours],
     ) -> Self {
+        let pool = MATCH_BOARD_POOL.get_or_init(|| MatchBoardPool::new(Default::default, |_| {}));
+        let mut board = pool.pull();
+        if board.len() < cells.len() {
+            board.resize(cells.len(), Default::default())
+        }
+        for i in 0..cells.len() {
+            board[i].clear();
+        }
         Self {
             settings,
             cells,
             lines,
             neighbours,
             matches: Default::default(),
-            match_board: cells.iter().map(|_| SmallVec::new()).collect(),
+            match_board: board,
             match_cells_cache: None,
         }
     }
@@ -153,7 +170,7 @@ impl<
         ) {
             let other_groups = &match_board[cell];
 
-            for &intersecting in other_groups {
+            for &intersecting in other_groups.iter() {
                 // Resolve the other group ID
                 let other_group = &mut matches[intersecting.0]
                     .as_mut()
@@ -239,7 +256,7 @@ impl<
                     if groups.is_empty() {
                         panic!(
                             "Something gone extremely wrong\ngroup: {:?}\nmatch_groups: {:?}\ngroup: {:?}",
-                            merged, self.match_board, group.cells
+                            merged, self.match_board.iter().map(|x|format!("{:?}", x.deref())).collect_vec(), group.cells
                         );
                     }
 
@@ -260,9 +277,10 @@ impl<
             }
 
             #[cfg(debug_assertions)]
-            for (i, cell) in self.match_board.iter().enumerate() {
+            for i in 0..self.cells.len() {
+                let cell = &self.match_board[i];
                 for dead_group in &groups_to_merge {
-                    for existing in cell {
+                    for existing in cell.iter() {
                         debug_assert!(
                             existing != dead_group,
                             "Should not have consumed group `{}` on the board (at position `{}`)",
@@ -275,13 +293,18 @@ impl<
 
             #[cfg(debug_assertions)]
             {
-                for (idx, groups) in self.match_board.iter().enumerate() {
+                for idx in 0..self.cells.len() {
+                    let groups = &self.match_board[idx];
                     if groups.is_empty() {
                         continue;
                     }
                     for i in 0..(groups.len() - 1) {
                         if groups[(i + 1)..].contains(&groups[i]) {
-                            panic!("Cell {} has bad groups composition: {:?}", idx, groups)
+                            panic!(
+                                "Cell {} has bad groups composition: {:?}",
+                                idx,
+                                groups.deref()
+                            )
                         }
                     }
                 }

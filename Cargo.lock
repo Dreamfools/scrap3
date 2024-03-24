@@ -1928,6 +1928,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "lockfree-object-pool"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a69c0481fc2424cb55795de7da41add33372ea75a94f9b6588ab6a2826dfebc"
+
+[[package]]
 name = "log"
 version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1965,6 +1971,7 @@ dependencies = [
  "criterion",
  "insta",
  "itertools 0.12.1",
+ "lockfree-object-pool",
  "match3",
  "ndshape",
  "nohash-hasher",

@@ -4,7 +4,7 @@ use match3::line::LineMatcherSettings;
 use match3::rect_board::RectBoard;
 use tinyrand::{RandRange, StdRand};
 
-pub fn criterion_benchmark(c: &mut Criterion) {
+pub fn match3_no_wildcards(c: &mut Criterion) {
     let settings = &LineMatcherSettings::common_match3();
     bench_board("common", c, 6, 6, 1, false, settings);
     bench_board("common", c, 6, 6, 2, false, settings);
@@ -19,6 +19,10 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     bench_board("match_neighbours", c, 6, 6, 5, false, settings);
     bench_board("match_neighbours", c, 10, 10, 5, false, settings);
     bench_board("match_neighbours", c, 25, 25, 5, false, settings);
+    let settings = &LineMatcherSettings::common_match3().with_merge_neighbours(true);
+    bench_board("wildcard", c, 6, 6, 5, true, settings);
+    bench_board("wildcard", c, 10, 10, 5, true, settings);
+    bench_board("wildcard", c, 25, 25, 5, true, settings);
 }
 
 fn bench_board(
@@ -71,5 +75,5 @@ fn populate_board(
     board
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, match3_no_wildcards);
 criterion_main!(benches);

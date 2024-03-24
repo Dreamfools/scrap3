@@ -7,6 +7,7 @@ edition = "2021"
 [dependencies]
 colored = { workspace = true, optional = true }
 itertools = { workspace = true }
+lockfree-object-pool = "0.1.5"
 ndshape = { workspace = true }
 nohash-hasher = { workspace = true }
 smallvec = { workspace = true }
