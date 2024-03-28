@@ -1,5 +1,5 @@
 use crate::rect_board::RectBoard;
-use crate::{BoardMatch, Gem, MatchColor};
+use crate::{BoardGem, BoardMatch, MatchColor};
 use colored::Colorize;
 use itertools::Itertools;
 use nohash_hasher::IntSet;
@@ -21,7 +21,7 @@ impl MatchColor for CharGem {
     }
 }
 
-impl Gem for CharGem {
+impl BoardGem for CharGem {
     type Color = CharGem;
 
     fn color(&self) -> Self::Color {

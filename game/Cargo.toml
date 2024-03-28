@@ -5,8 +5,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+asset_macro = { path = "../asset_macro" }
 comfy = { workspace = true }
-inline_tweak = { version = "1.1.1", features = ["derive"] }
+enum_decompose = { workspace = true }
+fs-err = { workspace = true }
+inline_tweak = { workspace = true, features = ["derive"] }
 match3 = { path = "../match3" }
-rect = { path = "../rect" }
+math = { path = "../math" }
+ndshape = { workspace = true }
+rect = { path = "../rect", features = ["glam"] }
 tinyrand = { workspace = true }
+tinyrand-std = { workspace = true }

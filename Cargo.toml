@@ -1,25 +1,39 @@
 [workspace]
 resolver = "2"
-members = ["game", "match3", "rect"]
+members = ["asset_macro", "game", "match3", "math", "rect"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+anyhow = "1.0.81"
+approx = "0.5.1"
 colored = "2.1.0"
-comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "13f4ac09fc9b664ec32b67b98bbb950c71269cb6" }
+comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "daaf2bb8080ef3bc12e39a139164a005c73c7655" }
+convert_case = "0.6.0"
 criterion = "0.5.1"
+derive = "1.0.0"
+enum_decompose = { git = "https://github.com/juh9870/enum_decompose.git", rev = "v1.0.0", package = "enum_decompose" }
+features = "0.10.0"
+fs-err = "2.11.0"
+glam = "0.24.2"
+inline_tweak = "1.1.1"
 insta = "1.36.1"
 itertools = "0.12.1"
 lockfree-object-pool = "0.1.5"
 ndshape = "0.3.0"
 nohash-hasher = "0.2.0"
+proc-macro2 = "1.0.79"
 proptest = "1.4.0"
+quote = "1.0.35"
 regex = "1.0.0"
 rstest = "0.18.2"
 serde = "1.0.197"
 serde_json5 = "0.1.0"
 smallvec = "1.13.2"
+strum = "0.26.2"
+syn = "2.0.55"
 tinyrand = "0.5.0"
+tinyrand-std = "0.5.0"
 
 [profile.release]
 opt-level = 3

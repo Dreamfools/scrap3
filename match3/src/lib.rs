@@ -41,7 +41,7 @@ pub trait MatchColor: Debug + Clone + Default {
     }
 }
 
-pub trait Gem {
+pub trait BoardGem {
     type Color: MatchColor;
 
     fn color(&self) -> Self::Color;
@@ -96,7 +96,7 @@ impl<Color: MatchColor> BoardMatch<Color> {
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
 pub struct SimpleGem<C: MatchColor>(pub C);
 
-impl<C: MatchColor> Gem for SimpleGem<C> {
+impl<C: MatchColor> BoardGem for SimpleGem<C> {
     type Color = C;
 
     fn color(&self) -> Self::Color {

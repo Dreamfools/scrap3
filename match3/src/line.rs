@@ -8,7 +8,7 @@ use lockfree_object_pool::{LinearObjectPool, LinearReusable};
 use nohash_hasher::IsEnabled;
 use smallvec::SmallVec;
 
-use crate::{get_board_match_pool, BoardMatch, MatchColor};
+use crate::{BoardMatch, MatchColor};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 struct MatchIndex(usize);
@@ -64,7 +64,12 @@ impl LineMatcherSettings {
         Self::new(3, None, false)
     }
 
-    pub fn find_matches<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>(
+    pub fn find_matches<
+        'a,
+        Gem: crate::BoardGem,
+        Line: AsRef<[usize]>,
+        Neighbours: AsRef<[usize]>,
+    >(
         &self,
         cells: &'a [Gem],
         lines: &'a [Line],
@@ -79,7 +84,8 @@ type MatchBoardPool = LinearObjectPool<Vec<SmallVec<[MatchIndex; 1]>>>;
 
 static MATCH_BOARD_POOL: OnceLock<MatchBoardPool> = OnceLock::new();
 
-struct LineMatcherState<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>> {
+struct LineMatcherState<'a, Gem: crate::BoardGem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
+{
     settings: LineMatcherSettings,
 
     cells: &'a [Gem],
@@ -90,7 +96,7 @@ struct LineMatcherState<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: A
     match_board: LinearReusable<'static, Vec<SmallVec<[MatchIndex; 1]>>>,
 }
 
-impl<'a, Gem: crate::Gem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
+impl<'a, Gem: crate::BoardGem, Line: AsRef<[usize]>, Neighbours: AsRef<[usize]>>
     LineMatcherState<'a, Gem, Line, Neighbours>
 {
     fn new(

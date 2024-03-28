@@ -210,18 +210,61 @@ impl Rect {
         }
     }
 
-    /// Returns the width of the rect.
+    /// Returns the width of the rect
     pub fn width(&self) -> f32 {
         self.maxx - self.minx
     }
 
-    /// Returns the height of the rect.
+    /// Returns the height of the rect
     pub fn height(&self) -> f32 {
         self.maxy - self.miny
     }
 
+    /// Returns the center of the rect
     pub fn center(&self) -> (f32, f32) {
         ((self.minx + self.maxx) / 2.0, (self.miny + self.maxy) / 2.0)
+    }
+
+    /// Returns the size of the rect
+    pub fn size(&self) -> (f32, f32) {
+        (self.width(), self.height())
+    }
+
+    /// Returns true if the rect contains the given point
+    pub fn contains(&self, pos: impl Into<(f32, f32)>) -> bool {
+        let pos = pos.into();
+        pos.0 >= self.minx && pos.0 <= self.maxx && pos.1 >= self.miny && pos.1 <= self.maxy
+    }
+
+    /// Returns a new rect that is the result of applying the given offset to the current rect
+    pub fn shift(&self, offset: impl Into<(f32, f32)>) -> Rect {
+        let offset = offset.into();
+        Rect::new(
+            self.minx + offset.0,
+            self.miny + offset.1,
+            self.maxx + offset.0,
+            self.maxy + offset.1,
+        )
+    }
+
+    pub fn recenter(&self, pos: impl Into<(f32, f32)>) -> Rect {
+        let pos = pos.into();
+        let (cx, cy) = self.center();
+        let dx = pos.0 - cx;
+        let dy = pos.1 - cy;
+        Rect::new(
+            self.minx + dx,
+            self.miny + dy,
+            self.maxx + dx,
+            self.maxy + dy,
+        )
+    }
+}
+
+#[cfg(feature = "glam")]
+impl From<Rect> for glam::f32::Vec2 {
+    fn from(value: Rect) -> Self {
+        value.size().into()
     }
 }
 
