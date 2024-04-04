@@ -1,5 +1,6 @@
 use comfy::{MathExtensions, Vec2};
 use enum_decompose::decompose;
+use inline_tweak::tweak;
 use math::{arc_angles, arc_center_radius};
 
 use crate::board::gem::{draw_gem, Gem};
@@ -20,16 +21,16 @@ pub enum GemAnimationKind {
 
 impl GemAnimationKind {
     /// Creates a new animation, calculating the duration based on the animation kind
-    pub fn animate(self, grid: &GridMath, start: f64) -> GemAnimation {
+    pub fn animate(self, grid: &GridMath, start: f64, speed: f64) -> GemAnimation {
         let duration = match &self {
             GemAnimationKind::Still => f64::INFINITY,
             GemAnimationKind::Held(_) => 0.0,
             GemAnimationKind::Swap(swap) => {
-                let distance = grid.distance2(swap.from, swap.to);
-                distance as f64 / 10.0
+                let distance = grid.grid_distance(swap.from, swap.to);
+                distance as f64 / tweak!(10.0)
             }
             GemAnimationKind::Fall(fall) => fall.height as f64 / 10.0,
-        };
+        } * speed;
         GemAnimation::new(self, start, start + duration)
     }
 
@@ -37,12 +38,20 @@ impl GemAnimationKind {
         let ui = ui.shrink(0.1);
         match self {
             GemAnimationKind::Still => draw_gem(gem, ui, 1.0),
-            GemAnimationKind::Held(held) => draw_gem(gem, ui.recenter(held.mouse_pos), 0.5),
+            GemAnimationKind::Held(held) => draw_gem(
+                gem,
+                ui.recenter(held.mouse_pos).next_layer().next_layer(),
+                0.5,
+            ),
             GemAnimationKind::Swap(shrink) => {
+                if shrink.from == shrink.to {
+                    draw_gem(gem, ui, 1.0);
+                    return;
+                }
                 let from = grid.center_at_index(shrink.from);
                 let to = grid.center_at_index(shrink.to);
 
-                let bulge = 1.0f32;
+                let bulge = grid.cell_height() * tweak!(0.66) / from.distance(to);
 
                 let (center, radius) = arc_center_radius(from, to, bulge);
 
@@ -51,10 +60,10 @@ impl GemAnimationKind {
                 let t = start_angle.lerp(end_angle, progress);
                 let pos = Vec2::from_angle(t) * radius + center;
 
-                draw_gem(gem, ui.recenter(pos), 1.0)
+                draw_gem(gem, ui.recenter(pos).next_layer(), 1.0)
             }
             GemAnimationKind::Fall(fall) => {
-                let oy = fall.height as f32 * progress;
+                let oy = fall.height as f32 * grid.cell_height() * progress;
 
                 draw_gem(gem, ui.map_rect(|r| r.shift((0.0, -oy))), 1.0)
             }
@@ -69,17 +78,27 @@ pub struct GemAnimation {
     end: f64,
 }
 
+impl Default for GemAnimation {
+    fn default() -> Self {
+        Self::still()
+    }
+}
+
 impl GemAnimation {
-    pub fn new(kind: GemAnimationKind, start: f64, end: f64) -> Self {
-        Self { kind, start, end }
+    pub fn new(kind: impl Into<GemAnimationKind>, start: f64, end: f64) -> Self {
+        Self {
+            kind: kind.into(),
+            start,
+            end,
+        }
     }
 
-    pub fn still() -> GemAnimationKind {
-        GemAnimationKind::Still
+    pub fn still() -> Self {
+        Self::new(GemAnimationKind::Still, 0.0, f64::INFINITY)
     }
 
-    pub fn held(mouse_pos: Vec2) -> GemAnimationKind {
-        GemHeldAnimation { mouse_pos }.into()
+    pub fn held(mouse_pos: Vec2) -> Self {
+        Self::new(GemHeldAnimation { mouse_pos }, 0.0, 0.0)
     }
 
     pub fn swap(from: usize, to: usize) -> GemAnimationKind {

@@ -182,6 +182,21 @@ impl GridMath {
     pub fn distance(&self, a: usize, b: usize) -> f32 {
         self.distance2(a, b).sqrt()
     }
+
+    /// Returns the grid (manhattan) distance between two cells
+    pub fn grid_distance(&self, a: usize, b: usize) -> usize {
+        let [ax, ay] = self.shape.delinearize(a);
+        let [bx, by] = self.shape.delinearize(b);
+        let dx = (ax as isize - bx as isize).abs();
+        let dy = (ay as isize - by as isize).abs();
+        dx.max(dy) as usize
+    }
+    pub fn cell_width(&self) -> f32 {
+        self.cell_width
+    }
+    pub fn cell_height(&self) -> f32 {
+        self.cell_height
+    }
 }
 
 impl Debug for GridMath {

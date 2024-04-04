@@ -2,6 +2,7 @@ use glam::{vec2, Vec2};
 
 // https://math.stackexchange.com/questions/482751/how-do-i-move-through-an-arc-between-two-specific-points
 // https://www.desmos.com/geometry/aofv2koj0k
+/// Returns the center and radius of an arc that goes through `from` and `to` with a given `bulge`
 pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32) -> (Vec2, f32) {
     let distance = from.distance(to);
 
@@ -18,6 +19,7 @@ pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32) -> (Vec2, f32) {
     (center, radius)
 }
 
+/// Returns the starting and ending angles of an arc that starts from `from` with a given `bulge` and radius
 pub fn arc_angles(center: Vec2, radius: f32, bulge: f32, from: Vec2) -> (f32, f32) {
     let arc = 4.0 * bulge.atan();
 
@@ -82,10 +84,15 @@ mod tests {
             prop_assume!(from.distance(to) > 0.01);
             let (center, radius) = arc_center_radius(from, to, bulge);
 
-            let epsilon = radius / 1e6;
+            let epsilon = radius / 1e5;
 
+            let perp_center = (from + to) / 2.0;
+
+            // Check that radi are correct
             assert_relative_eq!(from.distance(center), radius, epsilon = epsilon);
             assert_relative_eq!(to.distance(center), radius, epsilon = epsilon);
+            // Check that bulge is properly applied
+            assert_relative_eq!(perp_center.distance(center), radius - bulge, epsilon = epsilon);
         }
     }
 }

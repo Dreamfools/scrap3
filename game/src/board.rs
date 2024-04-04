@@ -1,8 +1,11 @@
 use crate::board::board::{random_board, BoardState, GemBoard};
-use crate::board::gem::draw_gem;
+use crate::board::board_anim::GemAnimation;
+
 use crate::ui::{GridMath, Ui};
 use crate::Scene;
-use comfy::{draw_circle, draw_rect, is_mouse_button_down, mouse_world, Color, MouseButton, Vec2};
+use comfy::{
+    draw_circle, draw_rect, get_time, is_mouse_button_down, mouse_world, Color, MouseButton, Vec2,
+};
 use inline_tweak::{tweak, tweak_fn};
 use match3::rect_board::GridMoveStrategy;
 use match3::Shape;
@@ -15,6 +18,11 @@ impl BoardScene {
     pub fn new(width: usize, height: usize) -> Self {
         let (board, state) = random_board(width, height);
         Self {
+            animations: board
+                .board
+                .iter()
+                .map(|_| GemAnimation::default())
+                .collect(),
             state,
             board,
             held_gem: None,
@@ -24,18 +32,21 @@ impl BoardScene {
 #[derive(Debug)]
 pub struct BoardScene {
     state: BoardState,
+    animations: Vec<GemAnimation>,
     board: GemBoard,
     held_gem: Option<(usize, Vec2)>,
 }
 
 impl BoardScene {
-    fn process_input(&mut self, interactive_ui: Ui, gmath: &GridMath) {
-        if matches!(self.state, BoardState::Idle | BoardState::Matching) {
-            return;
-        }
-
+    fn process_input(&mut self, interactive_ui: Ui, gmath: &GridMath, time: f64) {
         let mouse_pos = mouse_world();
         let trapped_pos = interactive_ui.clamp_pos(mouse_pos);
+
+        // println!("Mouse pos: {:?}, trapped pos: {:?}, state: {:?}, held_gem: {:?}, mouse_down: {:?}", mouse_pos, trapped_pos, self.state, self.held_gem, is_mouse_button_down(MouseButton::Left));
+
+        if !matches!(self.state, BoardState::Idle | BoardState::Matching) {
+            return;
+        }
 
         if is_mouse_button_down(MouseButton::Left) {
             let pressed = gmath.pos_to_index(trapped_pos);
@@ -61,6 +72,10 @@ impl BoardScene {
                         .move_gem(*held, pressed, GridMoveStrategy::Diagonals)
                     {
                         self.board.board.swap(cell, *held);
+                        self.animations[cell] =
+                            GemAnimation::swap(*held, cell).animate(gmath, time, 1.0);
+                        self.animations[*held] =
+                            GemAnimation::swap(cell, *held).animate(gmath, time, 1.0);
                         *held = cell;
                     }
                 }
@@ -69,6 +84,21 @@ impl BoardScene {
             }
         } else {
             self.held_gem = None;
+        }
+
+        // Assigning held animation to the held gem
+        if tweak!(true) {
+            if let Some((id, pos)) = self.held_gem {
+                self.animations[id] = GemAnimation::held(pos);
+            }
+        }
+    }
+
+    fn check_animations(&mut self, time: f64) {
+        for anim in &mut self.animations {
+            if anim.done(time) {
+                *anim = GemAnimation::still()
+            }
         }
     }
 }
@@ -90,7 +120,9 @@ impl Scene for BoardScene {
 
         let interactive_ui = ui.clone().shrink(0.01);
 
-        self.process_input(interactive_ui, &gmath);
+        let now = get_time();
+
+        self.process_input(interactive_ui, &gmath, now);
 
         let (main, secondary) = board_colors();
         let bg_z = ui.z;
@@ -101,23 +133,10 @@ impl Scene for BoardScene {
                 draw_rect(ui.rect.center().into(), ui.rect.into(), secondary, bg_z)
             }
 
-            if self.held_gem.is_some_and(|(cell, _)| cell == i) {
-                continue;
-            }
-
             let ui = ui.shrink(0.1);
-            draw_gem(gem, ui, 1.0);
+            self.animations[i].update(gem, ui, &gmath, now);
         }
 
-        if let Some((pos, touch)) = self.held_gem {
-            let gem_ui = ui
-                .next_layer()
-                .next_layer()
-                .with_rect(gmath.unit_cell())
-                .recenter(touch)
-                .shrink(0.1);
-
-            draw_gem(&self.board.board[pos], gem_ui, 0.5)
-        }
+        self.check_animations(now);
     }
 }
