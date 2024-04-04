@@ -197,6 +197,9 @@ impl GridMath {
     pub fn cell_height(&self) -> f32 {
         self.cell_height
     }
+    pub fn shape(&self) -> &RuntimeShape<usize, 2> {
+        &self.shape
+    }
 }
 
 impl Debug for GridMath {

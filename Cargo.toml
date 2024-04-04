@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["asset_macro", "game", "match3", "math", "rect"]
+members = ["asset_macro", "egui-tweak", "game", "match3", "math", "rect"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,6 +12,7 @@ comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "daaf2bb8080ef3b
 convert_case = "0.6.0"
 criterion = "0.5.1"
 derive = "1.0.0"
+egui = "0.24.1"
 enum_decompose = { git = "https://github.com/juh9870/enum_decompose.git", rev = "v1.0.0", package = "enum_decompose" }
 features = "0.10.0"
 fs-err = "2.11.0"

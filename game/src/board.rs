@@ -6,7 +6,8 @@ use crate::Scene;
 use comfy::{
     draw_circle, draw_rect, get_time, is_mouse_button_down, mouse_world, Color, MouseButton, Vec2,
 };
-use inline_tweak::{tweak, tweak_fn};
+use egui_tweak::tweak;
+use inline_tweak::tweak_fn;
 use match3::rect_board::GridMoveStrategy;
 use match3::Shape;
 
@@ -57,7 +58,7 @@ impl BoardScene {
                 let dist2 = trapped_pos.distance_squared(pressed_cell.center().into());
                 let hit_radius = pressed_cell.width() / 1.8;
 
-                if tweak!(false) {
+                if tweak("board.showMatchHitbox", false) {
                     draw_circle(
                         pressed_cell.center().into(),
                         hit_radius,
@@ -71,11 +72,15 @@ impl BoardScene {
                         .board
                         .move_gem(*held, pressed, GridMoveStrategy::Diagonals)
                     {
-                        self.board.board.swap(cell, *held);
+                        let [fx, fy] = gmath.shape().delinearize(*held);
+                        let [tx, ty] = gmath.shape().delinearize(cell);
+                        let flip = tx > fx || ty > fy;
                         self.animations[cell] =
-                            GemAnimation::swap(*held, cell).animate(gmath, time, 1.0);
+                            GemAnimation::swap(*held, cell, flip).animate(gmath, time, 1.0);
                         self.animations[*held] =
-                            GemAnimation::swap(cell, *held).animate(gmath, time, 1.0);
+                            GemAnimation::swap(cell, *held, flip).animate(gmath, time, 1.0);
+
+                        self.board.board.swap(cell, *held);
                         *held = cell;
                     }
                 }
@@ -87,7 +92,7 @@ impl BoardScene {
         }
 
         // Assigning held animation to the held gem
-        if tweak!(true) {
+        if tweak("board.showHeldAnimation", true) {
             if let Some((id, pos)) = self.held_gem {
                 self.animations[id] = GemAnimation::held(pos);
             }

@@ -7,6 +7,7 @@ edition = "2021"
 [dependencies]
 asset_macro = { path = "../asset_macro" }
 comfy = { workspace = true }
+egui-tweak = { path = "../egui-tweak", features = ["slider"] }
 enum_decompose = { workspace = true }
 fs-err = { workspace = true }
 inline_tweak = { workspace = true, features = ["derive"] }

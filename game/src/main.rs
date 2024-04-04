@@ -71,4 +71,14 @@ fn update(state: &mut GameState, _c: &mut EngineContext) {
     //     0,
     // );
     state.scene.update(Ui::new(screen_rect(), 0));
+    #[cfg(debug_assertions)]
+    debug();
+}
+
+fn debug() {
+    egui::Window::new("Tweaking")
+        .default_open(false)
+        .show(egui(), |ui| {
+            egui_tweak::editor::edit_tweakables(ui);
+        });
 }

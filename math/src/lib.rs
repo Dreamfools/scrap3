@@ -3,7 +3,7 @@ use glam::{vec2, Vec2};
 // https://math.stackexchange.com/questions/482751/how-do-i-move-through-an-arc-between-two-specific-points
 // https://www.desmos.com/geometry/aofv2koj0k
 /// Returns the center and radius of an arc that goes through `from` and `to` with a given `bulge`
-pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32) -> (Vec2, f32) {
+pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32, flip: bool) -> (Vec2, f32) {
     let distance = from.distance(to);
 
     let s = bulge * distance / 2.0;
@@ -13,20 +13,31 @@ pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32) -> (Vec2, f32) {
     let arc = 4.0 * bulge.atan();
 
     let c_x = radius * (arc / 2.0 - std::f32::consts::FRAC_PI_2).cos();
-    let c_y = -radius * (arc / 2.0 - std::f32::consts::FRAC_PI_2).sin();
+    let mut c_y = -radius * (arc / 2.0 - std::f32::consts::FRAC_PI_2).sin();
+    if flip {
+        c_y = -c_y;
+    }
 
     let center = normalize_or_right(to - from).rotate(vec2(c_x, c_y)) + from;
     (center, radius)
 }
 
 /// Returns the starting and ending angles of an arc that starts from `from` with a given `bulge` and radius
-pub fn arc_angles(center: Vec2, radius: f32, bulge: f32, from: Vec2) -> (f32, f32) {
+pub fn arc_angles(
+    center: Vec2,
+    radius: f32,
+    bulge: f32,
+    from: Vec2,
+    to: Vec2,
+    flip: bool,
+) -> (f32, f32) {
     let arc = 4.0 * bulge.atan();
+    let anchor = if flip { to } else { from };
 
-    let starting_angle = if center.y < from.y {
-        ((from.x - center.x) / radius).acos()
+    let starting_angle = if center.y < anchor.y {
+        ((anchor.x - center.x) / radius).clamp(-1.0, 1.0).acos()
     } else {
-        ((from.x - center.x) / radius).asin() - std::f32::consts::FRAC_PI_2
+        ((anchor.x - center.x) / radius).clamp(-1.0, 1.0).asin() - std::f32::consts::FRAC_PI_2
     };
     let end_angle = starting_angle + arc;
     (starting_angle, end_angle)
@@ -52,19 +63,19 @@ mod tests {
     #[test]
     fn arc_center_tests() {
         // Bulge 1
-        let (center, radius) = arc_center_radius(vec2(0.0, 0.0), vec2(2.0, 0.0), 1.0);
+        let (center, radius) = arc_center_radius(vec2(0.0, 0.0), vec2(2.0, 0.0), 1.0, false);
         assert_relative_eq!(center.x, 1.0);
         assert_relative_eq!(center.y, 0.0);
         assert_relative_eq!(radius, 1.0);
 
         // Bulge 0.5
-        let (center, radius) = arc_center_radius(vec2(0.0, 0.0), vec2(2.0, 0.0), 0.5);
+        let (center, radius) = arc_center_radius(vec2(0.0, 0.0), vec2(2.0, 0.0), 0.5, false);
         assert_relative_eq!(center.x, 1.0);
         assert_relative_eq!(center.y, 0.75);
         assert_relative_eq!(radius, 1.25);
 
         // Weird position
-        let (center, radius) = arc_center_radius(vec2(0.61, 1.23), vec2(2.283, 1.67), 0.673);
+        let (center, radius) = arc_center_radius(vec2(0.61, 1.23), vec2(2.283, 1.67), 0.673, false);
         assert_relative_eq!(center.x, 1.3570827);
         assert_relative_eq!(center.y, 1.7899889);
         assert_relative_eq!(radius, 0.93365955);
@@ -78,11 +89,12 @@ mod tests {
             x2 in -1000f32..=1000f32,
             y2 in -1000f32..=1000f32,
             bulge in 0.01f32..=1f32,
+            flip: bool,
         ) {
             let from = vec2(x1, y1);
             let to = vec2(x2, y2);
             prop_assume!(from.distance(to) > 0.01);
-            let (center, radius) = arc_center_radius(from, to, bulge);
+            let (center, radius) = arc_center_radius(from, to, bulge, flip);
 
             let epsilon = radius / 1e5;
 

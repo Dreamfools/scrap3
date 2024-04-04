@@ -1,6 +1,9 @@
+use comfy::egui::Slider;
 use comfy::{MathExtensions, Vec2};
 use enum_decompose::decompose;
-use inline_tweak::tweak;
+
+use egui_tweak::slider::tweak_slider;
+use egui_tweak::ui::tweak_ui;
 use math::{arc_angles, arc_center_radius};
 
 use crate::board::gem::{draw_gem, Gem};
@@ -14,7 +17,7 @@ pub enum GemAnimationKind {
     /// Gem that is held by mouse
     Held { mouse_pos: Vec2 },
     /// Gem that is currently getting swapped
-    Swap { from: usize, to: usize },
+    Swap { from: usize, to: usize, flip: bool },
     /// Gem that is currently falling
     Fall { target: usize, height: usize },
 }
@@ -27,7 +30,14 @@ impl GemAnimationKind {
             GemAnimationKind::Held(_) => 0.0,
             GemAnimationKind::Swap(swap) => {
                 let distance = grid.grid_distance(swap.from, swap.to);
-                distance as f64 / tweak!(10.0)
+                distance as f64
+                    / tweak_ui(
+                        "board.swapSpeed",
+                        12.5,
+                        &|ui: &mut comfy::egui::Ui, value: &mut f64| {
+                            ui.add(Slider::new(value, 0.1..=20.0).logarithmic(true));
+                        },
+                    )
             }
             GemAnimationKind::Fall(fall) => fall.height as f64 / 10.0,
         } * speed;
@@ -43,19 +53,23 @@ impl GemAnimationKind {
                 ui.recenter(held.mouse_pos).next_layer().next_layer(),
                 0.5,
             ),
-            GemAnimationKind::Swap(shrink) => {
-                if shrink.from == shrink.to {
+            GemAnimationKind::Swap(swap) => {
+                if swap.from == swap.to {
                     draw_gem(gem, ui, 1.0);
                     return;
                 }
-                let from = grid.center_at_index(shrink.from);
-                let to = grid.center_at_index(shrink.to);
+                let from = grid.center_at_index(swap.from);
+                let to = grid.center_at_index(swap.to);
 
-                let bulge = grid.cell_height() * tweak!(0.66) / from.distance(to);
+                let bulge = grid.cell_height() * tweak_slider("board.swapHeight", 0.66, 0.01, 1.0)
+                    / from.distance(to);
 
-                let (center, radius) = arc_center_radius(from, to, bulge);
+                let (center, radius) = arc_center_radius(from, to, bulge, swap.flip);
 
-                let (start_angle, end_angle) = arc_angles(center, radius, bulge, from);
+                let (start_angle, end_angle) =
+                    arc_angles(center, radius, bulge, from, to, swap.flip);
+
+                let progress = if swap.flip { 1.0 - progress } else { progress };
 
                 let t = start_angle.lerp(end_angle, progress);
                 let pos = Vec2::from_angle(t) * radius + center;
@@ -101,8 +115,8 @@ impl GemAnimation {
         Self::new(GemHeldAnimation { mouse_pos }, 0.0, 0.0)
     }
 
-    pub fn swap(from: usize, to: usize) -> GemAnimationKind {
-        GemSwapAnimation { from, to }.into()
+    pub fn swap(from: usize, to: usize, flip: bool) -> GemAnimationKind {
+        GemSwapAnimation { from, to, flip }.into()
     }
 
     pub fn fall(target: usize, height: usize) -> GemAnimationKind {
