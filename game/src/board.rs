@@ -1,5 +1,5 @@
 use crate::board::board::{random_board, BoardState, GemBoard};
-use crate::board::board_anim::GemAnimation;
+use crate::board::board_anim::{GemAnimation, GemVisuals};
 
 use crate::ui::{GridMath, Ui};
 use crate::Scene;
@@ -24,6 +24,7 @@ impl BoardScene {
                 .iter()
                 .map(|_| GemAnimation::default())
                 .collect(),
+            extra_animations: vec![],
             state,
             board,
             held_gem: None,
@@ -34,6 +35,8 @@ impl BoardScene {
 pub struct BoardScene {
     state: BoardState,
     animations: Vec<GemAnimation>,
+    /// Extra animations for gems that are not on the board (like the held gem)
+    extra_animations: Vec<(usize, GemAnimation)>,
     board: GemBoard,
     held_gem: Option<(usize, Vec2)>,
 }
@@ -75,8 +78,9 @@ impl BoardScene {
                         let [fx, fy] = gmath.shape().delinearize(*held);
                         let [tx, ty] = gmath.shape().delinearize(cell);
                         let flip = tx > fx || ty > fy;
-                        self.animations[cell] =
-                            GemAnimation::swap(*held, cell, flip).animate(gmath, time, 1.0);
+                        self.animations[cell] = GemAnimation::swap(*held, cell, flip)
+                            .animate(gmath, time, 1.0)
+                            .with_visuals(GemVisuals::Ghost);
                         self.animations[*held] =
                             GemAnimation::swap(cell, *held, flip).animate(gmath, time, 1.0);
 
@@ -94,17 +98,22 @@ impl BoardScene {
         // Assigning held animation to the held gem
         if tweak("board.showHeldAnimation", true) {
             if let Some((id, pos)) = self.held_gem {
-                self.animations[id] = GemAnimation::held(pos);
+                self.extra_animations
+                    .push((id, GemAnimation::held(pos).with_visuals(GemVisuals::Held)));
+                self.animations[id].replace_if_still(|| {
+                    GemAnimation::still()
+                        .with_visuals(GemVisuals::Ghost)
+                        .with_duration(0.0)
+                });
             }
         }
     }
 
     fn check_animations(&mut self, time: f64) {
         for anim in &mut self.animations {
-            if anim.done(time) {
-                *anim = GemAnimation::still()
-            }
+            anim.replace_if_done(time, GemAnimation::still);
         }
+        self.extra_animations.retain(|(_, anim)| !anim.done(time));
     }
 }
 
@@ -121,7 +130,8 @@ impl Scene for BoardScene {
         let ui = ui.trim_to_aspect_ratio(width as f32 / height as f32);
 
         let gmath = GridMath::new(ui.rect, width, height);
-        let grid = ui.next_layer().grid(width, height);
+        let grid_layer = ui.next_layer();
+        let grid = grid_layer.clone().grid(width, height);
 
         let interactive_ui = ui.clone().shrink(0.01);
 
@@ -136,10 +146,13 @@ impl Scene for BoardScene {
             // Draw grid BG
             if (i / width + i % width) % 2 == 0 {
                 draw_rect(ui.rect.center().into(), ui.rect.into(), secondary, bg_z)
-            }
-
-            let ui = ui.shrink(0.1);
+            };
             self.animations[i].update(gem, ui, &gmath, now);
+        }
+
+        for (pos, animation) in &self.extra_animations {
+            let ui = grid_layer.clone().with_rect(gmath.rect_at_index(*pos));
+            animation.update(&self.board.board[*pos], ui, &gmath, now);
         }
 
         self.check_animations(now);
