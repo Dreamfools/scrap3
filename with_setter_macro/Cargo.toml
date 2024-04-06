@@ -7,6 +7,6 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-darling = "0.20.8"
+darling = { workspace = true }
 quote = { workspace = true }
 syn = { workspace = true }

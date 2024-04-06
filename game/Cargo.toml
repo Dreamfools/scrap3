@@ -15,6 +15,7 @@ match3 = { path = "../match3" }
 math = { path = "../math" }
 ndshape = { workspace = true }
 rect = { path = "../rect", features = ["glam"] }
+simple-easing = { workspace = true }
 tinyrand = { workspace = true }
 tinyrand-std = { workspace = true }
 with_setter_macro = { path = "../with_setter_macro" }

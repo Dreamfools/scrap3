@@ -1414,6 +1414,7 @@ dependencies = [
  "math",
  "ndshape",
  "rect",
+ "simple-easing",
  "tinyrand",
  "tinyrand-std",
  "with_setter_macro",
