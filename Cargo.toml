@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["asset_macro", "egui-tweak", "game", "match3", "math", "rect"]
+members = ["asset_macro", "egui-tweak", "game", "match3", "math", "rect", "with_setter_macro"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

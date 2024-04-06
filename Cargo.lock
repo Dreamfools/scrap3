@@ -1416,6 +1416,7 @@ dependencies = [
  "rect",
  "tinyrand",
  "tinyrand-std",
+ "with_setter_macro",
 ]
 
 [[package]]
@@ -3926,6 +3927,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "with_setter_macro"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "quote",
+ "syn 2.0.55",
 ]
 
 [[package]]
