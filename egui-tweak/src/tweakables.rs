@@ -9,6 +9,15 @@ impl Tweakable for bool {
     }
 }
 
+impl Tweakable for String {
+    fn draw(&mut self, ui: &mut Ui, name: &str) {
+        ui.horizontal(|ui| {
+            ui.label(name);
+            ui.text_edit_singleline(self);
+        });
+    }
+}
+
 #[duplicate_item(
     int_type;
     [ u8 ];

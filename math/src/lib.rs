@@ -104,7 +104,7 @@ mod tests {
             assert_relative_eq!(from.distance(center), radius, epsilon = epsilon);
             assert_relative_eq!(to.distance(center), radius, epsilon = epsilon);
             // Check that bulge is properly applied
-            assert_relative_eq!(perp_center.distance(center), radius - bulge, epsilon = epsilon);
+            assert_relative_eq!(perp_center.distance(center), radius - (bulge * from.distance(to) / 2.0), epsilon = epsilon);
         }
     }
 }

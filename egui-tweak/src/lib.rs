@@ -5,8 +5,8 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::sync::{Mutex, MutexGuard, OnceLock};
 
+pub mod display;
 pub mod editor;
-#[cfg(feature = "slider")]
 pub mod slider;
 pub mod tweakables;
 pub mod ui;

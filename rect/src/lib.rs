@@ -144,6 +144,16 @@ impl Rect {
         Rect::new(self.minx + a, self.miny + a, self.maxx - a, self.maxy - a)
     }
 
+    /// Contract the rect horizontally, leaving the original unmodified.
+    pub fn contract_x(&self, a: f32) -> Rect {
+        Rect::new(self.minx + a, self.miny, self.maxx - a, self.maxy)
+    }
+
+    /// Contract the rect horizontally, leaving the original unmodified.
+    pub fn contract_y(&self, a: f32) -> Rect {
+        Rect::new(self.minx, self.miny + a, self.maxx, self.maxy - a)
+    }
+
     /// Splits current rect into a list of columns, leaving the original unmodified.
     pub fn cols(&self, n_cols: usize, gap: f32) -> Vec<Rect> {
         let mut cols = Vec::with_capacity(n_cols);

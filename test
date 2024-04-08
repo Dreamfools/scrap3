@@ -1,0 +1,1 @@
+cargo clean -p match3 && cargo test --all || cargo insta review

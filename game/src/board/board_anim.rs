@@ -1,6 +1,7 @@
 use comfy::egui::Slider;
 use comfy::{MathExtensions, Vec2};
 use enum_decompose::decompose;
+use strum::EnumIs;
 
 use egui_tweak::slider::tweak_slider;
 use egui_tweak::ui::tweak_ui;
@@ -25,7 +26,13 @@ pub enum GemMovement {
 
 impl GemMovement {
     /// Creates a new animation, calculating the duration based on the animation kind
-    pub fn animate(self, grid: &GridMath, start: f64, speed: f64) -> GemAnimation {
+    pub fn animate(
+        self,
+        grid: &GridMath,
+        start: f64,
+        speed: f64,
+        easing: fn(f32) -> f32,
+    ) -> GemAnimation {
         let duration = match &self {
             GemMovement::Still => f64::INFINITY,
             GemMovement::Held(_) => 0.0,
@@ -42,7 +49,7 @@ impl GemMovement {
             }
             GemMovement::Fall(fall) => fall.height as f64 / 10.0,
         } * speed;
-        GemAnimation::new(self, start, start + duration)
+        GemAnimation::new(self, start, start + duration, easing)
     }
 
     pub fn ui(&self, ui: Ui, grid: &GridMath, progress: f32) -> Ui {
@@ -86,33 +93,43 @@ fn swap_pos(grid: &GridMath, progress: f32, from: usize, to: usize, flip: bool) 
     Some(pos)
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, EnumIs)]
 pub enum GemVisuals {
     #[default]
     Normal,
     Ghost,
     Held,
+    Cracking,
 }
 
 impl GemVisuals {
-    pub fn draw(&self, gem: &Gem, ui: Ui) {
+    pub fn draw(&self, gem: &Gem, mut ui: Ui, progress: f32) {
         let opacity = match self {
             GemVisuals::Normal => 1.0,
             GemVisuals::Ghost => tweak_slider("board.opacity.ghost", 0.3, 0.0, 1.0),
             GemVisuals::Held => tweak_slider("board.opacity.held", 0.7, 0.0, 1.0),
+            GemVisuals::Cracking => 1.0 - progress,
         };
+
+        if self.is_cracking() {
+            ui = ui.map_rect(|r| {
+                r.contract_x(r.width() * simple_easing::cubic_out(progress) / 2.0)
+                    .contract_y(r.height() * simple_easing::back_in(progress) / 2.0)
+            });
+        }
 
         draw_gem(gem, ui, opacity);
     }
 }
 
-#[derive(Debug, WithSetters)]
+#[derive(Debug, Clone, WithSetters)]
 pub struct GemAnimation {
-    movement: GemMovement,
+    pub movement: GemMovement,
     #[setters(vis = "pub")]
-    visuals: GemVisuals,
-    start: f64,
-    end: f64,
+    pub visuals: GemVisuals,
+    pub start: f64,
+    pub end: f64,
+    pub easing: fn(f32) -> f32,
 }
 
 impl Default for GemAnimation {
@@ -122,21 +139,32 @@ impl Default for GemAnimation {
 }
 
 impl GemAnimation {
-    pub fn new(kind: impl Into<GemMovement>, start: f64, end: f64) -> Self {
+    pub fn new(kind: impl Into<GemMovement>, start: f64, end: f64, easing: fn(f32) -> f32) -> Self {
         Self {
             movement: kind.into(),
             visuals: Default::default(),
             start,
             end,
+            easing,
         }
     }
 
     pub fn still() -> Self {
-        Self::new(GemMovement::Still, 0.0, f64::INFINITY)
+        Self::new(
+            GemMovement::Still,
+            0.0,
+            f64::INFINITY,
+            simple_easing::linear,
+        )
     }
 
     pub fn held(mouse_pos: Vec2) -> Self {
-        Self::new(GemHeldAnimation { mouse_pos }, 0.0, 0.0)
+        Self::new(
+            GemHeldAnimation { mouse_pos },
+            0.0,
+            0.0,
+            simple_easing::linear,
+        )
     }
 
     pub fn swap(from: usize, to: usize, flip: bool) -> GemMovement {
@@ -147,11 +175,22 @@ impl GemAnimation {
         GemFallAnimation { target, height }.into()
     }
 
+    pub fn crack(start: f64, speed: f64, easing: fn(f32) -> f32) -> Self {
+        let crack_duration = tweak_slider("board.crackTime", 1.0 / 3.0, 0.0, 1.0) * speed;
+        Self {
+            movement: GemMovement::Still,
+            visuals: GemVisuals::Cracking,
+            start,
+            end: start + crack_duration,
+            easing,
+        }
+    }
+
     pub fn update(&self, gem: &Gem, ui: Ui, grid: &GridMath, time: f64) {
         let progress = ((time - self.start) / (self.end - self.start)).clamp(0.0, 1.0);
 
         let ui = self.movement.ui(ui, grid, progress as f32);
-        self.visuals.draw(gem, ui);
+        self.visuals.draw(gem, ui, progress as f32);
     }
 
     pub fn replace_if_still(&mut self, anim: impl FnOnce() -> Self) {
@@ -170,10 +209,13 @@ impl GemAnimation {
         time >= self.end
     }
 
-    pub fn with_duration(self, duration: f64) -> Self {
-        Self {
-            end: self.start + duration,
-            ..self
-        }
+    pub fn with_duration(mut self, duration: f64) -> Self {
+        self.end = self.start + duration;
+        self
+    }
+
+    pub fn with_delay(mut self, delay: f64) -> Self {
+        self.start += delay;
+        self
     }
 }

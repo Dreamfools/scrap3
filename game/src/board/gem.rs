@@ -36,10 +36,9 @@ pub type Gem = SimpleGem<GemColor>;
 
 #[tweak_fn]
 pub fn draw_gem(gem: &Gem, ui: Ui, alpha: f32) {
-    let ui = ui.trim_to_aspect_ratio(1.0);
     let center = ui.rect.center().into();
     let color = match gem.color() {
-        GemColor::Empty => Color::rgb8(0x0, 0x0, 0x0),
+        GemColor::Empty => return,
         GemColor::Red => Color::rgb8(0xFF, 0x10, 0x0),
         GemColor::Green => Color::rgb8(0x0, 0xFF, 0x0),
         GemColor::Blue => Color::rgb8(0x00, 0x33, 0xff),

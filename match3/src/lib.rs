@@ -53,7 +53,7 @@ static BOARD_MATCH_POOL: OnceLock<BoardMatchPool> = OnceLock::new();
 
 #[inline]
 pub fn get_board_match_pool() -> &'static BoardMatchPool {
-    BOARD_MATCH_POOL.get_or_init(|| BoardMatchPool::new(|| Default::default(), |v| v.clear()))
+    BOARD_MATCH_POOL.get_or_init(|| BoardMatchPool::new(Default::default, |v| v.clear()))
 }
 
 pub struct BoardMatch<Color: MatchColor> {
@@ -93,7 +93,7 @@ impl<Color: MatchColor> BoardMatch<Color> {
     }
 }
 
-#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
 pub struct SimpleGem<C: MatchColor>(pub C);
 
 impl<C: MatchColor> BoardGem for SimpleGem<C> {

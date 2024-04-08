@@ -10,7 +10,7 @@ mod ui;
 simple_game!("Contexts are fun :)", GameState, config, setup, update);
 
 pub trait Scene {
-    fn update(&mut self, ui: Ui);
+    fn update(&mut self, ui: Ui, now: f64);
 }
 
 pub struct GameState {
@@ -70,7 +70,7 @@ fn update(state: &mut GameState, _c: &mut EngineContext) {
     //     GREEN,
     //     0,
     // );
-    state.scene.update(Ui::new(screen_rect(), 0));
+    state.scene.update(Ui::new(screen_rect(), 0), get_time());
     #[cfg(debug_assertions)]
     debug();
 }

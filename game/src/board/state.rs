@@ -1,16 +1,24 @@
-use crate::board::gem::{Gem, GEM_COLORS};
+use crate::board::gem::{Gem, GemColor, GEM_COLORS};
+use enum_decompose::decompose;
 use match3::rect_board::RectBoard;
-use match3::SimpleGem;
+use match3::{BoardMatch, SimpleGem};
+use strum::EnumIs;
 use tinyrand::RandRange;
 use tinyrand_std::thread_rand;
 
 pub type GemBoard = RectBoard<Gem>;
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[decompose(prefix = "", suffix = "State", derive = "Debug")]
+#[derive(Debug, EnumIs)]
 pub enum BoardState {
     Idle,
-    Moving,
+    Moving {
+        spin_end: f64,
+    },
     Refilling,
-    Matching,
+    Matching {
+        groups: Vec<BoardMatch<GemColor>>,
+        end: f64,
+    },
 }
 
 pub fn random_board(width: usize, height: usize) -> (RectBoard<Gem>, BoardState) {

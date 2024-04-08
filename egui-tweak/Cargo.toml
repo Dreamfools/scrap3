@@ -11,4 +11,3 @@ egui = { workspace = true }
 
 [features]
 release-tweak = []
-slider = []

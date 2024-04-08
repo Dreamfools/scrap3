@@ -1,19 +1,23 @@
-use crate::board::board::{random_board, BoardState, GemBoard};
 use crate::board::board_anim::{GemAnimation, GemVisuals};
+use crate::board::state::{random_board, BoardState, GemBoard, MatchingState, MovingState};
 
+use crate::board::gem::{Gem, GemColor};
 use crate::ui::{GridMath, Ui};
 use crate::Scene;
 use comfy::{
-    draw_circle, draw_rect, get_time, is_mouse_button_down, mouse_world, Color, MouseButton, Vec2,
+    debug, draw_circle, draw_rect, info, is_mouse_button_down, mouse_world, Color, MouseButton,
+    Vec2,
 };
+use egui_tweak::display::debug_display;
 use egui_tweak::tweak;
 use inline_tweak::tweak_fn;
+use match3::line::LineMatcherSettings;
 use match3::rect_board::GridMoveStrategy;
-use match3::Shape;
+use match3::{Shape, SimpleGem};
 
-pub mod board;
 pub mod board_anim;
 pub mod gem;
+pub mod state;
 
 impl BoardScene {
     pub fn new(width: usize, height: usize) -> Self {
@@ -28,27 +32,75 @@ impl BoardScene {
             state,
             board,
             held_gem: None,
+            next_state: None,
         }
     }
 }
 #[derive(Debug)]
 pub struct BoardScene {
     state: BoardState,
+    next_state: Option<BoardState>,
     animations: Vec<GemAnimation>,
     /// Extra animations for gems that are not on the board (like the held gem)
-    extra_animations: Vec<(usize, GemAnimation)>,
+    extra_animations: Vec<(usize, Gem, GemAnimation)>,
     board: GemBoard,
     held_gem: Option<(usize, Vec2)>,
 }
 
 impl BoardScene {
+    fn next_state(&mut self, state: BoardState) {
+        info!(
+            "State transition requested: {:?} -> {:?}",
+            self.state, state
+        );
+        if let Some(next_state) = &self.next_state {
+            #[cfg(debug_assertions)]
+            panic!(
+                "State transition already queued: {:?} -> {:?}",
+                self.state, next_state
+            );
+            #[cfg(not(debug_assertions))]
+            error!(
+                "State transition already queued: {:?} -> {:?}",
+                self.state, next_state
+            )
+        }
+        self.next_state = Some(state);
+    }
+
+    fn move_held_gem(&mut self, gmath: &GridMath, time: f64, to: usize) {
+        let (held, _) = self.held_gem.as_mut().expect("Should have a held gem");
+
+        debug!("Begin swap from held cell {} to {}", *held, to);
+        for cell in self.board.move_gem(*held, to, GridMoveStrategy::Diagonals) {
+            let [fx, fy] = gmath.shape().delinearize(*held);
+            let [tx, ty] = gmath.shape().delinearize(cell);
+            let flip = tx > fx || ty > fy;
+
+            if tweak("board.showSwapAnimation", true) {
+                self.animations[cell] = GemAnimation::swap(*held, cell, flip)
+                    .animate(gmath, time, 1.0, simple_easing::linear)
+                    .with_visuals(GemVisuals::Ghost);
+                self.animations[*held] = GemAnimation::swap(cell, *held, flip).animate(
+                    gmath,
+                    time,
+                    1.0,
+                    simple_easing::linear,
+                );
+            }
+
+            self.board.board.swap(cell, *held);
+            debug!("Swapping {} and {}", *held, cell);
+            *held = cell;
+        }
+    }
+
+    /// Process input and updates board state and animations
     fn process_input(&mut self, interactive_ui: Ui, gmath: &GridMath, time: f64) {
         let mouse_pos = mouse_world();
         let trapped_pos = interactive_ui.clamp_pos(mouse_pos);
 
-        // println!("Mouse pos: {:?}, trapped pos: {:?}, state: {:?}, held_gem: {:?}, mouse_down: {:?}", mouse_pos, trapped_pos, self.state, self.held_gem, is_mouse_button_down(MouseButton::Left));
-
-        if !matches!(self.state, BoardState::Idle | BoardState::Matching) {
+        if !self.state.is_idle() && !self.state.is_moving() {
             return;
         }
 
@@ -71,21 +123,10 @@ impl BoardScene {
                 }
 
                 if *held != pressed && dist2 <= hit_radius * hit_radius {
-                    for cell in self
-                        .board
-                        .move_gem(*held, pressed, GridMoveStrategy::Diagonals)
-                    {
-                        let [fx, fy] = gmath.shape().delinearize(*held);
-                        let [tx, ty] = gmath.shape().delinearize(cell);
-                        let flip = tx > fx || ty > fy;
-                        self.animations[cell] = GemAnimation::swap(*held, cell, flip)
-                            .animate(gmath, time, 1.0)
-                            .with_visuals(GemVisuals::Ghost);
-                        self.animations[*held] =
-                            GemAnimation::swap(cell, *held, flip).animate(gmath, time, 1.0);
-
-                        self.board.board.swap(cell, *held);
-                        *held = cell;
+                    if self.state.is_idle() {
+                        self.start_moving(time);
+                    } else {
+                        self.move_held_gem(gmath, time, pressed);
                     }
                 }
             } else if interactive_ui.rect.contains(mouse_pos) {
@@ -98,8 +139,11 @@ impl BoardScene {
         // Assigning held animation to the held gem
         if tweak("board.showHeldAnimation", true) {
             if let Some((id, pos)) = self.held_gem {
-                self.extra_animations
-                    .push((id, GemAnimation::held(pos).with_visuals(GemVisuals::Held)));
+                self.extra_animations.push((
+                    id,
+                    self.board.board[id].clone(),
+                    GemAnimation::held(pos).with_visuals(GemVisuals::Held),
+                ));
                 self.animations[id].replace_if_still(|| {
                     GemAnimation::still()
                         .with_visuals(GemVisuals::Ghost)
@@ -107,13 +151,71 @@ impl BoardScene {
                 });
             }
         }
+
+        if !tweak("board.unlimitedMatching", false)
+            && self.held_gem.is_none()
+            && self.state.is_moving()
+        {
+            self.start_matching();
+        }
+    }
+
+    fn update_state(&mut self) {
+        match &mut self.state {
+            BoardState::Idle => {}
+            BoardState::Moving(_) => {}
+            BoardState::Refilling => todo!(),
+            BoardState::Matching(_) => {}
+        }
+    }
+
+    fn start_matching(&mut self) {
+        let matches = self
+            .board
+            .find_matches_linear(&LineMatcherSettings::common_match3());
+
+        self.next_state = Some(BoardState::Matching(MatchingState {
+            groups: matches,
+            end: 0.0,
+        }));
+    }
+
+    fn start_moving(&mut self, now: f64) {
+        self.next_state(BoardState::Moving(MovingState {
+            spin_end: now + 5.0,
+        }));
     }
 
     fn check_animations(&mut self, time: f64) {
         for anim in &mut self.animations {
             anim.replace_if_done(time, GemAnimation::still);
         }
-        self.extra_animations.retain(|(_, anim)| !anim.done(time));
+        self.extra_animations
+            .retain(|(_, _, anim)| !anim.done(time));
+    }
+
+    fn on_state_enter(&mut self, now: f64) {
+        let BoardState::Matching(matching) = &mut self.state else {
+            return;
+        };
+
+        let mut group_time = now;
+        for group in &matching.groups {
+            let anim = GemAnimation::crack(group_time, 1.0, simple_easing::linear);
+            group_time = anim.end;
+            for &pos in group.cells() {
+                let gem = self.board.board[pos].clone();
+                self.extra_animations.push((pos, gem, anim.clone()));
+            }
+        }
+        matching.end = group_time;
+
+        // TODO: separate logic into some generic methods
+        for group in &matching.groups {
+            for &pos in group.cells() {
+                self.board.board[pos] = SimpleGem(GemColor::Empty)
+            }
+        }
     }
 }
 
@@ -124,7 +226,14 @@ fn board_colors() -> (Color, Color) {
 
 impl Scene for BoardScene {
     // #[tweak_fn]
-    fn update(&mut self, ui: Ui) {
+    fn update(&mut self, ui: Ui, now: f64) {
+        if let Some(next_state) = self.next_state.take() {
+            self.state = next_state;
+            self.on_state_enter(now);
+        }
+
+        debug_display("board.state", &self.state);
+
         let [width, height] = self.board.shape.as_array();
 
         let ui = ui.trim_to_aspect_ratio(width as f32 / height as f32);
@@ -134,8 +243,6 @@ impl Scene for BoardScene {
         let grid = grid_layer.clone().grid(width, height);
 
         let interactive_ui = ui.clone().shrink(0.01);
-
-        let now = get_time();
 
         self.process_input(interactive_ui, &gmath, now);
 
@@ -150,9 +257,9 @@ impl Scene for BoardScene {
             self.animations[i].update(gem, ui, &gmath, now);
         }
 
-        for (pos, animation) in &self.extra_animations {
+        for (pos, gem, animation) in &self.extra_animations {
             let ui = grid_layer.clone().with_rect(gmath.rect_at_index(*pos));
-            animation.update(&self.board.board[*pos], ui, &gmath, now);
+            animation.update(gem, ui, &gmath, now);
         }
 
         self.check_animations(now);

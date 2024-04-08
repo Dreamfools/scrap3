@@ -18,7 +18,6 @@ impl<T: Numeric + Send + Sync> Tweakable for SliderTweakable<T> {
     }
 }
 
-#[cfg(feature = "slider")]
 #[inline]
 pub fn tweak_slider<T: Numeric + Send + Sync>(
     name: impl Into<Name>,
@@ -29,7 +28,7 @@ pub fn tweak_slider<T: Numeric + Send + Sync>(
     tweak(name, SliderTweakable { value, min, max }).value
 }
 
-#[cfg(all(feature = "release-tweak", feature = "slider"))]
+#[cfg(feature = "release-tweak")]
 #[inline]
 pub fn release_tweak_slider<T: Numeric + Send + Sync>(
     name: impl Into<Name>,
