@@ -1,0 +1,40 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+Gem should fall in place after matching
+Board: 
+╭───╮
+│-r-│
+│-g-│
+│-g-│
+│rgr│
+╰───╯
+Match #0 - g:
+╭───╮
+│   │
+│ g │
+│ g │
+│ g │
+╰───╯
+Remaining cells:
+╭───╮
+│-r-│
+│- -│
+│- -│
+│r r│
+╰───╯
+After Gravity:
+╭───╮
+│- -│
+│- -│
+│- -│
+│rrr│
+╰───╯
+After Refill:
+╭───╮
+│###│
+│###│
+│###│
+│rrr│
+╰───╯

@@ -1,4 +1,5 @@
 use crate::rect_board::RectBoard;
+use crate::refilling::{GravityRefill, GravityRefillAction, RefillableGem};
 use crate::{BoardGem, BoardMatch, MatchColor};
 use colored::Colorize;
 use itertools::Itertools;
@@ -26,6 +27,12 @@ impl BoardGem for CharGem {
 
     fn color(&self) -> Self::Color {
         *self
+    }
+}
+
+impl RefillableGem for CharGem {
+    fn is_empty(&self) -> bool {
+        self.0 == ' ' || self.0 == '-'
     }
 }
 
@@ -118,9 +125,9 @@ pub fn pretty_print_board(board: &CharBoard, colored: bool) -> String {
     )
 }
 
-pub fn visualize_match(
+pub fn visualize_and_apply_matches(
     name: String,
-    mut board: CharBoard,
+    board: &mut CharBoard,
     mut matches: Vec<BoardMatch<CharGem>>,
     colored: bool,
 ) -> String {
@@ -160,4 +167,20 @@ pub fn visualize_match(
         );
     }
     text
+}
+
+pub fn visualise_and_apply_gravity(board: &mut CharBoard) -> String {
+    let actions = GravityRefill::refill(&board.board, board.vertical_lines());
+    let (falling, refilling) = actions
+        .iter()
+        .partition::<Vec<_>, _>(|a| matches!(a, GravityRefillAction::Fall(_)));
+    for fall in falling {
+        fall.apply(&mut board.board, |_| unreachable!())
+    }
+    let mut result = format!("\nAfter Gravity:\n{}", pretty_print_board(board, false));
+    for refill in refilling {
+        refill.apply(&mut board.board, |_| '#'.into())
+    }
+    result += &format!("\nAfter Refill:\n{}", pretty_print_board(board, false));
+    result
 }

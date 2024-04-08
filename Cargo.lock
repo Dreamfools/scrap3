@@ -2024,6 +2024,7 @@ version = "0.1.0"
 dependencies = [
  "colored",
  "criterion",
+ "enum_decompose",
  "insta",
  "itertools 0.12.1",
  "lockfree-object-pool",

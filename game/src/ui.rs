@@ -123,10 +123,11 @@ pub struct GridMath {
     rows: usize,
     cell_width: f32,
     cell_height: f32,
+    swap_y: bool,
 }
 
 impl GridMath {
-    pub fn new(rect: Rect, cols: usize, rows: usize) -> Self {
+    pub fn new(rect: Rect, cols: usize, rows: usize, swap_y: bool) -> Self {
         let cell_width = rect.width() / cols as f32;
         let cell_height = rect.height() / rows as f32;
         Self {
@@ -136,19 +137,37 @@ impl GridMath {
             rows,
             cell_width,
             cell_height,
+            swap_y,
         }
+    }
+
+    fn linearize(&self, x: usize, y: usize) -> usize {
+        if self.swap_y {
+            self.shape.linearize([x, self.rows - y - 1])
+        } else {
+            self.shape.linearize([x, y])
+        }
+    }
+
+    fn delinearize(&self, pos: usize) -> (usize, usize) {
+        let [x, mut y] = self.shape.delinearize(pos);
+        if self.swap_y {
+            y = self.rows - y - 1;
+        }
+
+        (x, y)
     }
 
     /// Returns the index of a cell that contains a position
     pub fn pos_to_index(&self, pos: Vec2) -> usize {
         let x = ((pos.x - self.rect.minx) / self.cell_width).floor() as usize;
         let y = ((pos.y - self.rect.miny) / self.cell_height).floor() as usize;
-        self.shape.linearize([x, y])
+        self.linearize(x, y)
     }
 
     /// Returns a rect for a cell in a grid
     pub fn rect_at_index(&self, index: usize) -> Rect {
-        let [x, y] = self.shape.delinearize(index);
+        let (x, y) = self.delinearize(index);
         let minx = self.rect.minx + x as f32 * self.cell_width;
         let miny = self.rect.miny + y as f32 * self.cell_height;
         let maxx = minx + self.cell_width;
@@ -158,7 +177,7 @@ impl GridMath {
 
     /// Returns the center of a cell in a grid
     pub fn center_at_index(&self, index: usize) -> Vec2 {
-        let [x, y] = self.shape.delinearize(index);
+        let (x, y) = self.delinearize(index);
         let pos_x = self.rect.minx + (x as f32 + 0.5) * self.cell_width;
         let pos_y = self.rect.miny + (y as f32 + 0.5) * self.cell_height;
         vec2(pos_x, pos_y)
@@ -171,8 +190,8 @@ impl GridMath {
 
     /// Returns the squared distance between two cells
     pub fn distance2(&self, a: usize, b: usize) -> f32 {
-        let [ax, ay] = self.shape.delinearize(a);
-        let [bx, by] = self.shape.delinearize(b);
+        let (ax, ay) = self.delinearize(a);
+        let (bx, by) = self.delinearize(b);
         let dx = ax as f32 - bx as f32;
         let dy = ay as f32 - by as f32;
         dx * dx + dy * dy
@@ -185,8 +204,8 @@ impl GridMath {
 
     /// Returns the grid (manhattan) distance between two cells
     pub fn grid_distance(&self, a: usize, b: usize) -> usize {
-        let [ax, ay] = self.shape.delinearize(a);
-        let [bx, by] = self.shape.delinearize(b);
+        let (ax, ay) = self.delinearize(a);
+        let (bx, by) = self.delinearize(b);
         let dx = (ax as isize - bx as isize).abs();
         let dy = (ay as isize - by as isize).abs();
         dx.max(dy) as usize

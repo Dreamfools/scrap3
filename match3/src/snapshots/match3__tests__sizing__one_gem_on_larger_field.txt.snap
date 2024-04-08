@@ -1,0 +1,21 @@
+---
+source: match3/src/tests.rs
+expression: "variants[0].1"
+---
+One gem should fall on larger field
+Board: 
+╭──╮
+│-r│
+│--│
+╰──╯
+No matches
+After Gravity:
+╭──╮
+│--│
+│-r│
+╰──╯
+After Refill:
+╭──╮
+│##│
+│#r│
+╰──╯

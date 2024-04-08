@@ -6,6 +6,7 @@ edition = "2021"
 
 [dependencies]
 colored = { workspace = true, optional = true }
+enum_decompose = { workspace = true }
 itertools = { workspace = true }
 lockfree-object-pool = { workspace = true }
 ndshape = { workspace = true }

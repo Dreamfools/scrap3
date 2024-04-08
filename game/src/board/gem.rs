@@ -1,6 +1,7 @@
 use crate::ui::Ui;
 use comfy::{draw_sprite_pro, texture_id, Color, DrawTextureProParams, SpriteAlign};
 use inline_tweak::tweak_fn;
+use match3::refilling::RefillableGem;
 use match3::{BoardGem, MatchColor, SimpleGem};
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
@@ -29,6 +30,12 @@ impl MatchColor for GemColor {
 
     fn can_start_match(&self) -> bool {
         self != &GemColor::Empty
+    }
+}
+
+impl RefillableGem for GemColor {
+    fn is_empty(&self) -> bool {
+        matches!(self, GemColor::Empty)
     }
 }
 

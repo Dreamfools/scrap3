@@ -4,12 +4,18 @@ use enum_decompose::decompose;
 use strum::EnumIs;
 
 use egui_tweak::slider::tweak_slider;
+use egui_tweak::tweak;
 use egui_tweak::ui::tweak_ui;
-use math::{arc_angles, arc_center_radius};
+use math::arc::{arc_angles, arc_center_radius};
+use math::gravity::{fall_time, height_at_fall_progress};
 use with_setter_macro::WithSetters;
 
 use crate::board::gem::{draw_gem, Gem};
 use crate::ui::{GridMath, Ui};
+
+pub fn fall_gravity() -> f32 {
+    tweak("board.gravity", 48.0)
+}
 
 #[decompose(prefix = "Gem", suffix = "Animation")]
 #[derive(Debug, Clone)]
@@ -47,7 +53,7 @@ impl GemMovement {
                         },
                     )
             }
-            GemMovement::Fall(fall) => fall.height as f64 / 10.0,
+            GemMovement::Fall(fall) => fall_time(fall.height as f32, fall_gravity()) as f64,
         } * speed;
         GemAnimation::new(self, start, start + duration, easing)
     }
@@ -64,9 +70,10 @@ impl GemMovement {
                 }
             }
             GemMovement::Fall(fall) => {
-                let oy = fall.height as f32 * grid.cell_height() * progress;
+                let oy = height_at_fall_progress(fall.height as f32, fall_gravity(), progress)
+                    * grid.cell_height();
 
-                ui.map_rect(|r| r.shift((0.0, -oy)))
+                ui.map_rect(|r| r.shift((0.0, oy)))
             }
         }
     }
@@ -176,7 +183,7 @@ impl GemAnimation {
     }
 
     pub fn crack(start: f64, speed: f64, easing: fn(f32) -> f32) -> Self {
-        let crack_duration = tweak_slider("board.crackTime", 1.0 / 3.0, 0.0, 1.0) * speed;
+        let crack_duration = tweak_slider("board.crackTime", 0.3, 0.0, 1.0) * speed;
         Self {
             movement: GemMovement::Still,
             visuals: GemVisuals::Cracking,

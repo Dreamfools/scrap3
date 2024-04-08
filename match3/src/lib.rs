@@ -15,6 +15,7 @@ pub mod char_board;
 pub mod line;
 
 pub mod rect_board;
+pub mod refilling;
 
 /// Match colors are assumed to be cheap to clone and instantiate my matching
 /// algorithms

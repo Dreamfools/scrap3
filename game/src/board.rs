@@ -1,5 +1,7 @@
 use crate::board::board_anim::{GemAnimation, GemVisuals};
-use crate::board::state::{random_board, BoardState, GemBoard, MatchingState, MovingState};
+use crate::board::state::{
+    random_board, random_gem, BoardState, GemBoard, MatchingState, MovingState, RefillingState,
+};
 
 use crate::board::gem::{Gem, GemColor};
 use crate::ui::{GridMath, Ui};
@@ -13,6 +15,7 @@ use egui_tweak::tweak;
 use inline_tweak::tweak_fn;
 use match3::line::LineMatcherSettings;
 use match3::rect_board::GridMoveStrategy;
+use match3::refilling::{remove_matched, GravityRefill};
 use match3::{Shape, SimpleGem};
 
 pub mod board_anim;
@@ -160,21 +163,37 @@ impl BoardScene {
         }
     }
 
-    fn update_state(&mut self) {
+    fn update_state(&mut self, now: f64) {
         match &mut self.state {
             BoardState::Idle => {}
             BoardState::Moving(_) => {}
-            BoardState::Refilling => todo!(),
-            BoardState::Matching(_) => {}
+            BoardState::Refilling(refilling) => {
+                if now >= refilling.end {
+                    self.start_matching()
+                }
+            }
+            BoardState::Matching(matching) => {
+                if now >= matching.end {
+                    if matching.groups.is_empty() {
+                        self.start_idle()
+                    } else {
+                        self.start_refilling()
+                    }
+                }
+            }
         }
+    }
+
+    fn start_refilling(&mut self) {
+        self.next_state(BoardState::Refilling(RefillingState { end: 0.0 }));
     }
 
     fn start_matching(&mut self) {
         let matches = self
             .board
-            .find_matches_linear(&LineMatcherSettings::common_match3());
+            .find_matches_linear(&LineMatcherSettings::common_match3().with_merge_neighbours(true));
 
-        self.next_state = Some(BoardState::Matching(MatchingState {
+        self.next_state(BoardState::Matching(MatchingState {
             groups: matches,
             end: 0.0,
         }));
@@ -186,6 +205,10 @@ impl BoardScene {
         }));
     }
 
+    fn start_idle(&mut self) {
+        self.next_state(BoardState::Idle)
+    }
+
     fn check_animations(&mut self, time: f64) {
         for anim in &mut self.animations {
             anim.replace_if_done(time, GemAnimation::still);
@@ -194,26 +217,41 @@ impl BoardScene {
             .retain(|(_, _, anim)| !anim.done(time));
     }
 
-    fn on_state_enter(&mut self, now: f64) {
-        let BoardState::Matching(matching) = &mut self.state else {
-            return;
-        };
-
-        let mut group_time = now;
-        for group in &matching.groups {
-            let anim = GemAnimation::crack(group_time, 1.0, simple_easing::linear);
-            group_time = anim.end;
-            for &pos in group.cells() {
-                let gem = self.board.board[pos].clone();
-                self.extra_animations.push((pos, gem, anim.clone()));
+    fn on_state_enter(&mut self, gmath: &GridMath, now: f64) {
+        match &mut self.state {
+            BoardState::Idle => {}
+            BoardState::Moving(_) => {}
+            BoardState::Refilling(refilling) => {
+                let actions = GravityRefill::refill(&self.board.board, self.board.vertical_lines());
+                for action in actions {
+                    action.apply(&mut self.board.board, |_| random_gem());
+                    let height = action.height();
+                    let target = action.target();
+                    let anim = GemAnimation::fall(target, height).animate(
+                        gmath,
+                        now,
+                        1.0,
+                        simple_easing::linear,
+                    );
+                    refilling.end = refilling.end.max(anim.end);
+                    self.animations[target] = anim;
+                }
             }
-        }
-        matching.end = group_time;
+            BoardState::Matching(matching) => {
+                let mut group_time = now;
+                for group in &matching.groups {
+                    let anim = GemAnimation::crack(group_time, 1.0, simple_easing::linear);
+                    group_time = anim.end;
+                    for &pos in group.cells() {
+                        let gem = self.board.board[pos].clone();
+                        self.extra_animations.push((pos, gem, anim.clone()));
+                    }
+                }
+                matching.end = group_time;
 
-        // TODO: separate logic into some generic methods
-        for group in &matching.groups {
-            for &pos in group.cells() {
-                self.board.board[pos] = SimpleGem(GemColor::Empty)
+                remove_matched(&mut self.board.board, &matching.groups, || {
+                    SimpleGem(GemColor::Empty)
+                });
             }
         }
     }
@@ -225,31 +263,32 @@ fn board_colors() -> (Color, Color) {
 }
 
 impl Scene for BoardScene {
-    // #[tweak_fn]
     fn update(&mut self, ui: Ui, now: f64) {
-        if let Some(next_state) = self.next_state.take() {
-            self.state = next_state;
-            self.on_state_enter(now);
-        }
-
         debug_display("board.state", &self.state);
 
         let [width, height] = self.board.shape.as_array();
 
         let ui = ui.trim_to_aspect_ratio(width as f32 / height as f32);
 
-        let gmath = GridMath::new(ui.rect, width, height);
-        let grid_layer = ui.next_layer();
-        let grid = grid_layer.clone().grid(width, height);
+        let gmath = GridMath::new(ui.rect, width, height, true);
+
+        if let Some(next_state) = self.next_state.take() {
+            self.state = next_state;
+            self.on_state_enter(&gmath, now);
+        }
 
         let interactive_ui = ui.clone().shrink(0.01);
 
         self.process_input(interactive_ui, &gmath, now);
+        self.update_state(now);
+
+        let grid_layer = ui.next_layer();
 
         let (main, secondary) = board_colors();
         let bg_z = ui.z;
         draw_rect(ui.rect.center().into(), ui.rect.into(), main, bg_z);
-        for (i, (ui, gem)) in grid.into_iter().zip(self.board.board.iter()).enumerate() {
+        for (i, gem) in self.board.board.iter().enumerate() {
+            let ui = grid_layer.clone().with_rect(gmath.rect_at_index(i));
             // Draw grid BG
             if (i / width + i % width) % 2 == 0 {
                 draw_rect(ui.rect.center().into(), ui.rect.into(), secondary, bg_z)

@@ -1,5 +1,9 @@
-use crate::char_board::{board_from_str, display_board, visualize_match, CharBoard, CharGem};
+use crate::char_board::{
+    board_from_str, display_board, pretty_print_board, visualise_and_apply_gravity,
+    visualize_and_apply_matches, CharBoard, CharGem,
+};
 use crate::line::LineMatcherSettings;
+use crate::refilling::{GravityRefill, GravityRefillAction};
 use crate::MatchColor;
 use insta::assert_snapshot;
 use itertools::Itertools;
@@ -20,7 +24,7 @@ struct MatchSettings {
     merge_neighbours: Option<bool>,
 }
 
-fn check_path(prefix: &str, path: impl AsRef<Path>) {
+fn check_path(prefix: &str, path: impl AsRef<Path>, gravity: bool) {
     let path = path.as_ref();
     let test = std::fs::read_to_string(path).unwrap();
     let mut lines = test.lines().peekable();
@@ -69,12 +73,14 @@ fn check_path(prefix: &str, path: impl AsRef<Path>) {
     let variants = settings_variations
         .into_iter()
         .map(|(settings_name, settings)| {
-            let board = board.clone();
+            let mut board = board.clone();
             let matches = board.find_matches_linear(&settings);
-            (
-                settings_name,
-                visualize_match(name.to_string(), board, matches, false),
-            )
+            let mut result =
+                visualize_and_apply_matches(name.to_string(), &mut board, matches, false);
+            if gravity {
+                result += &visualise_and_apply_gravity(&mut board)
+            }
+            (settings_name, result)
         })
         .collect::<Vec<(&'static str, String)>>();
 
@@ -97,17 +103,22 @@ fn check_path(prefix: &str, path: impl AsRef<Path>) {
 
 #[rstest]
 fn common_line3_file_tests(#[files("src/cases/common/*.txt")] path: PathBuf) {
-    check_path("common", path);
+    check_path("common", path, false);
 }
 
 #[rstest]
 fn wildcard_line3_file_tests(#[files("src/cases/wildcard/*.txt")] path: PathBuf) {
-    check_path("wildcard", path);
+    check_path("wildcard", path, false);
 }
 
 #[rstest]
 fn sizing_line3_file_tests(#[files("src/cases/sizing/*.txt")] path: PathBuf) {
-    check_path("sizing", path);
+    check_path("sizing", path, false);
+}
+
+#[rstest]
+fn gravity_line3_file_tests(#[files("src/cases/gravity/*.txt")] path: PathBuf) {
+    check_path("sizing", path, true);
 }
 
 fn prop_board(size: usize) -> impl Strategy<Value = CharBoard> {
@@ -136,18 +147,20 @@ fn prop_board(size: usize) -> impl Strategy<Value = CharBoard> {
 
 #[test]
 fn test_dev() {
-    let b = board_from_str("rr*g");
+    let mut b = board_from_str("-r\n--");
     let settings = S::common_match3();
     // settings.merge_neighbours = false;
     // settings.line_size = 2;
     let matches = b.find_matches_linear(&settings);
-    visualize_match("DEV".to_string(), b, matches, false);
+    let mut result = visualize_and_apply_matches("DEV".to_string(), &mut b, matches, false);
+    result += &visualise_and_apply_gravity(&mut b);
+    println!("{result}")
 }
 
 #[test]
 fn random_tests() {
     let mut runner = TestRunner::default();
-    let run_result = runner.run(&prop_board(64), |board| {
+    let run_result = runner.run(&prop_board(64), |mut board| {
         let mut settings = S::common_match3();
         settings.line_size = 3;
         let matches = board.find_matches_linear(&settings);
@@ -158,7 +171,7 @@ fn random_tests() {
             }
         }
         if let Some(err) = check_straight_matches(&cloned) {
-            let visualized = visualize_match(err, board, matches, false);
+            let visualized = visualize_and_apply_matches(err, &mut board, matches, false);
             panic!("{}", visualized)
         }
 

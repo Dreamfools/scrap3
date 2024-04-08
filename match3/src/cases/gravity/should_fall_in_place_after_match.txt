@@ -1,0 +1,5 @@
+Gem should fall in place after matching
+-r-
+-g-
+-g-
+rgr

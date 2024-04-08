@@ -39,11 +39,11 @@ impl<T: BoardGem> RectBoard<T> {
         let shape = RuntimeShape::<usize, 2>::new([width, height]);
         let mut lines: Vec<Vec<usize>> = vec![];
         let mut neighbours: Vec<Vec<usize>> = vec![];
-        for y in 0..height {
-            lines.push((0..width).map(|x| shape.linearize([x, y])).collect());
-        }
         for x in 0..width {
             lines.push((0..height).map(|y| shape.linearize([x, y])).collect());
+        }
+        for y in 0..height {
+            lines.push((0..width).map(|x| shape.linearize([x, y])).collect());
         }
 
         for i in 0..shape.size() {
@@ -70,6 +70,14 @@ impl<T: BoardGem> RectBoard<T> {
             lines: Arc::new(lines),
             neighbours: Arc::new(neighbours),
         }
+    }
+
+    pub fn vertical_lines(&self) -> &[Vec<usize>] {
+        &self.lines[..self.width()]
+    }
+
+    pub fn horizontal_lines(&self) -> &[Vec<usize>] {
+        &self.lines[self.width()..]
     }
 
     pub fn find_matches_linear(&self, settings: &LineMatcherSettings) -> Vec<BoardMatch<T::Color>> {

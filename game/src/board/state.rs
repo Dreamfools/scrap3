@@ -14,19 +14,25 @@ pub enum BoardState {
     Moving {
         spin_end: f64,
     },
-    Refilling,
+    Refilling {
+        end: f64,
+    },
     Matching {
         groups: Vec<BoardMatch<GemColor>>,
         end: f64,
     },
 }
 
-pub fn random_board(width: usize, height: usize) -> (RectBoard<Gem>, BoardState) {
+pub fn random_gem() -> Gem {
     let mut rand = thread_rand();
+    let i = rand.next_range(0..GEM_COLORS.len());
+    SimpleGem(GEM_COLORS[i])
+}
+
+pub fn random_board(width: usize, height: usize) -> (RectBoard<Gem>, BoardState) {
     let mut board = Vec::with_capacity(width * height);
     for _ in 0..width * height {
-        let i = rand.next_range(0..GEM_COLORS.len());
-        board.push(SimpleGem(GEM_COLORS[i]));
+        board.push(random_gem());
     }
     let board = GemBoard::new(width, height, board);
     (board, BoardState::Idle)
