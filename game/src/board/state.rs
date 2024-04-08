@@ -13,6 +13,7 @@ pub enum BoardState {
     Idle,
     Moving {
         spin_end: f64,
+        total_time: f64,
     },
     Refilling {
         end: f64,

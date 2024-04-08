@@ -166,7 +166,14 @@ impl BoardScene {
     fn update_state(&mut self, now: f64) {
         match &mut self.state {
             BoardState::Idle => {}
-            BoardState::Moving(_) => {}
+            BoardState::Moving(moving) => {
+                if now >= moving.spin_end {
+                    // Check to prevent double state switch when gem is released at the same frame as timer runs out
+                    if !matches!(self.next_state, Some(BoardState::Matching(_))) {
+                        self.start_matching()
+                    }
+                }
+            }
             BoardState::Refilling(refilling) => {
                 if now >= refilling.end {
                     self.start_matching()
@@ -202,6 +209,7 @@ impl BoardScene {
     fn start_moving(&mut self, now: f64) {
         self.next_state(BoardState::Moving(MovingState {
             spin_end: now + 5.0,
+            total_time: 5.0,
         }));
     }
 
@@ -268,7 +276,9 @@ impl Scene for BoardScene {
 
         let [width, height] = self.board.shape.as_array();
 
-        let ui = ui.trim_to_aspect_ratio(width as f32 / height as f32);
+        let mut ui = ui.trim_to_aspect_ratio(width as f32 / (height as f32 + 0.2));
+
+        let mut timer_ui = ui.cut_bottom(ui.rect.height() / (height as f32 + 0.2) * 0.2);
 
         let gmath = GridMath::new(ui.rect, width, height, true);
 
@@ -286,6 +296,37 @@ impl Scene for BoardScene {
 
         let (main, secondary) = board_colors();
         let bg_z = ui.z;
+
+        if let BoardState::Moving(MovingState {
+            spin_end,
+            total_time,
+        }) = self.state
+        {
+            let progress = 1.0 - ((spin_end - now) / total_time).clamp(0.0, 1.0) as f32;
+
+            let empty_ui = timer_ui.cut_right(timer_ui.rect.width() * progress);
+
+            draw_rect(
+                timer_ui.rect.center().into(),
+                timer_ui.rect.into(),
+                Color::rgb8(0x0, 0xff, 0x0),
+                bg_z,
+            );
+            draw_rect(
+                empty_ui.rect.center().into(),
+                empty_ui.rect.into(),
+                main.darken(0.75),
+                bg_z,
+            );
+        } else {
+            draw_rect(
+                timer_ui.rect.center().into(),
+                timer_ui.rect.into(),
+                main.darken(0.66),
+                bg_z,
+            );
+        }
+
         draw_rect(ui.rect.center().into(), ui.rect.into(), main, bg_z);
         for (i, gem) in self.board.board.iter().enumerate() {
             let ui = grid_layer.clone().with_rect(gmath.rect_at_index(i));
