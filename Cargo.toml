@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["asset_macro", "egui-tweak", "game", "match3", "math", "rect", "with_setter_macro"]
+exclude = ["externals/scrapcore_serialization", "externals/yakui-macroquad", "externals/yakui-miniquad"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -31,6 +32,7 @@ proptest = "1.4.0"
 quote = "1.0.35"
 regex = "1.0.0"
 rstest = "0.18.2"
+scrapcore_serialization = { path = "externals/scrapcore_serialization/scrapcore_serialization" }
 serde = "1.0.197"
 serde_json5 = "0.1.0"
 simple-easing = "1.0.1"
@@ -39,6 +41,14 @@ strum = "0.26.2"
 syn = "2.0.55"
 tinyrand = "0.5.0"
 tinyrand-std = "0.5.0"
+yakui = { git = "https://github.com/SecondHalfGames/yakui.git", rev = "2ea1ecc691b2391d237502637d707d0e2fee15fc" }
+yakui-macroquad = { path = "externals/yakui-macroquad" }
+yakui-miniquad = { path = "externals/yakui-miniquad" }
+#[patch.'https://github.com/juh9870/yakui-miniquad.git']
+#yakui-miniquad = { path = "externals/yakui-miniquad" }
+#
+#[patch.'https://github.com/juh9870/yakui-macroquad.git']
+#yakui-macroquad = { path = "externals/yakui-macroquad" }
 
 [profile.release]
 opt-level = 3

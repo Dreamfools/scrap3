@@ -48,7 +48,7 @@ pub fn draw_gem(gem: &Gem, ui: Ui, alpha: f32) {
         GemColor::Empty => return,
         GemColor::Red => Color::rgb8(0xFF, 0x10, 0x0),
         GemColor::Green => Color::rgb8(0x0, 0xFF, 0x0),
-        GemColor::Blue => Color::rgb8(0x00, 0x33, 0xff),
+        GemColor::Blue => Color::rgb8(0x00, 0xff, 0xff),
         GemColor::Light => Color::rgb8(0xFF, 0xFF, 0x44),
         GemColor::Dark => Color::rgb8(0x55, 0x33, 0xFF),
     }

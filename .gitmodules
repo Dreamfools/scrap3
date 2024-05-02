@@ -1,0 +1,11 @@
+[submodule "externals/yakui-macroquad"]
+	path = externals/yakui-macroquad
+	url = ../../juh9870/yakui-macroquad.git
+	branch = "yakui_main"
+[submodule "externals/yakui-miniquad"]
+	path = externals/yakui-miniquad
+	url = ../../juh9870/yakui-miniquad.git
+	branch = "yakui_main"
+[submodule "externals/scrapcore_serialization"]
+	path = externals/scrapcore_serialization
+	url = ../../Dreamfools/scrapcore_serialization.git
