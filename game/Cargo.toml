@@ -5,18 +5,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-asset_macro = { path = "../asset_macro" }
-comfy = { workspace = true }
-egui-tweak = { path = "../egui-tweak" }
-enum_decompose = { workspace = true }
-fs-err = { workspace = true }
-inline_tweak = { workspace = true, features = ["derive"] }
-match3 = { path = "../match3" }
-math = { path = "../math" }
-ndshape = { workspace = true }
-rect = { path = "../rect", features = ["glam"] }
-simple-easing = { workspace = true }
-strum = { workspace = true, features = ["derive"] }
-tinyrand = { workspace = true }
-tinyrand-std = { workspace = true }
-with_setter_macro = { path = "../with_setter_macro" }
+macroquad = { workspace = true }
+yakui = { workspace = true }
+yakui-macroquad = { workspace = true }

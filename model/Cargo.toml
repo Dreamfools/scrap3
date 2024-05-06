@@ -1,0 +1,21 @@
+[package]
+name = "model"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ahash = { workspace = true, features = ["serde"] }
+assets_manager = { workspace = true, features = ["json", "hot-reloading"] }
+atomic_refcell = { workspace = true }
+csscolorparser = { workspace = true }
+itertools = { workspace = true }
+macroquad = { workspace = true, default-features = false }
+nohash-hasher = { workspace = true }
+schemars = { workspace = true }
+scrapcore_serialization = { workspace = true, features = ["derive", "miette", "macroquad"] }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+# Exposes serialized versions of data and registry
+full = []

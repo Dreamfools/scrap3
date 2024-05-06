@@ -11,6 +11,7 @@ let
     libXrandr
     libXi
     libxkbcommon
+    libGL
   ];
 in mkShell.override {
   stdenv = pkgs.stdenvAdapters.useMoldLinker pkgs.stdenv;
@@ -21,16 +22,16 @@ in mkShell.override {
     })
     pkg-config
     alsa-lib
-          pkgs.cargo-bloat
-          pkgs.cargo-unused-features
-          pkgs.cargo-watch
-          pkgs.cargo-sort
-          pkgs.cargo-machete
-          pkgs.cargo-depgraph
-          pkgs.cargo-limit
-          pkgs.cargo-flamegraph
-          pkgs.cargo-insta
-          pkgs.pre-commit
+    pkgs.cargo-bloat
+    pkgs.cargo-unused-features
+    pkgs.cargo-watch
+    pkgs.cargo-sort
+    pkgs.cargo-machete
+    pkgs.cargo-depgraph
+    pkgs.cargo-limit
+    pkgs.cargo-flamegraph
+    pkgs.cargo-insta
+    pkgs.pre-commit
   ];
   shellHook = ''
     export RUST_BACKTRACE=1

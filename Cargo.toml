@@ -1,17 +1,22 @@
 [workspace]
 resolver = "2"
-members = ["asset_macro", "egui-tweak", "game", "match3", "math", "rect", "with_setter_macro"]
+members = ["asset_macro", "egui-tweak", "game", "game_comfy", "match3", "math", "model", "rect", "with_setter_macro"]
 exclude = ["externals/scrapcore_serialization", "externals/yakui-macroquad", "externals/yakui-miniquad"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+ahash = "0.8.11"
 anyhow = "1.0.81"
 approx = "0.5.1"
+assets_manager = "0.11"
+atomic_refcell = "0.1"
+cfg-if = "1.0"
 colored = "2.1.0"
 comfy = { git = "https://github.com/darthdeus/comfy.git", rev = "daaf2bb8080ef3bc12e39a139164a005c73c7655" }
 convert_case = "0.6.0"
 criterion = "0.5.1"
+csscolorparser = "0.6"
 darling = "0.20.8"
 derive = "1.0.0"
 downcast-rs = "1.2.0"
@@ -25,6 +30,8 @@ inline_tweak = "1.1.1"
 insta = "1.36.1"
 itertools = "0.12.1"
 lockfree-object-pool = "0.1.5"
+macroquad = "0.4.5"
+miette = "7"
 ndshape = "0.3.0"
 nohash-hasher = "0.2.0"
 proc-macro2 = "1.0.79"
@@ -32,6 +39,7 @@ proptest = "1.4.0"
 quote = "1.0.35"
 regex = "1.0.0"
 rstest = "0.18.2"
+schemars = "0.8"
 scrapcore_serialization = { path = "externals/scrapcore_serialization/scrapcore_serialization" }
 serde = "1.0.197"
 serde_json5 = "0.1.0"
@@ -39,13 +47,15 @@ simple-easing = "1.0.1"
 smallvec = "1.13.2"
 strum = "0.26.2"
 syn = "2.0.55"
+thiserror = "1"
 tinyrand = "0.5.0"
 tinyrand-std = "0.5.0"
 yakui = { git = "https://github.com/SecondHalfGames/yakui.git", rev = "2ea1ecc691b2391d237502637d707d0e2fee15fc" }
 yakui-macroquad = { path = "externals/yakui-macroquad" }
 yakui-miniquad = { path = "externals/yakui-miniquad" }
-#[patch.'https://github.com/juh9870/yakui-miniquad.git']
-#yakui-miniquad = { path = "externals/yakui-miniquad" }
+
+[patch.'https://github.com/juh9870/yakui-miniquad.git']
+yakui-miniquad = { path = "externals/yakui-miniquad" }
 #
 #[patch.'https://github.com/juh9870/yakui-macroquad.git']
 #yakui-macroquad = { path = "externals/yakui-macroquad" }
