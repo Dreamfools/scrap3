@@ -11,18 +11,20 @@ mod singletons {
     pub mod settings;
 }
 
-pub mod registry;
+mod registry;
 
 mod loading;
 
 // Exposing items
+pub use registry::id::*;
+pub use registry::{
+    PartialRegistry, Registry, RegistryAssetKind, RegistryError, RegistryItem, RegistryItemKind,
+};
 
 pub use assets::color::ColorData;
-pub use assets::sprite::SpriteData;
-pub use assets::sprite::SpriteId;
+pub use assets::sprite::{SpriteData, SpriteId};
 
-pub use collections::gem::GemColor;
-pub use collections::gem::GemModifier;
+pub use collections::gem::{GemColor, GemModifier};
 
 pub use singletons::settings::ModSettings;
 

@@ -1,5 +1,5 @@
 use crate::assets::sprite::{SpriteData, SpriteDataSerialized};
-use crate::registry::GemColorId;
+use crate::GemColorId;
 use ahash::AHashMap;
 use nohash_hasher::IntMap;
 use scrapcore_serialization::derive::DatabaseModel;
