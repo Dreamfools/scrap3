@@ -1450,6 +1450,9 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "macroquad",
+ "miette",
+ "model",
+ "thiserror",
  "yakui",
  "yakui-macroquad",
 ]
@@ -2256,6 +2259,7 @@ dependencies = [
  "csscolorparser",
  "itertools 0.12.1",
  "macroquad",
+ "miette",
  "nohash-hasher",
  "schemars",
  "scrapcore_serialization",

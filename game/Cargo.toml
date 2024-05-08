@@ -6,5 +6,8 @@ edition = "2021"
 
 [dependencies]
 macroquad = { workspace = true }
+miette = { workspace = true, features = ["fancy"] }
+model = { workspace = true }
+thiserror = { workspace = true }
 yakui = { workspace = true }
 yakui-macroquad = { workspace = true }

@@ -10,6 +10,7 @@ atomic_refcell = { workspace = true }
 csscolorparser = { workspace = true }
 itertools = { workspace = true }
 macroquad = { workspace = true, default-features = false }
+miette = { workspace = true }
 nohash-hasher = { workspace = true }
 schemars = { workspace = true }
 scrapcore_serialization = { workspace = true, features = ["derive", "miette", "macroquad"] }

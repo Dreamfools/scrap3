@@ -1,8 +1,9 @@
 use crate::assets::color::{ColorData, ColorDataSerialized};
 use ahash::AHashMap;
 use assets_manager::SharedString;
-use atomic_refcell::AtomicRefCell;
+use atomic_refcell::{AtomicRef, AtomicRefCell};
 use macroquad::color::{Color, WHITE};
+use macroquad::miniquad::TextureId;
 use macroquad::texture::Texture2D;
 use schemars::JsonSchema;
 use scrapcore_serialization::registry::{AssetsHolder, PartialRegistry};
@@ -39,6 +40,20 @@ impl SpriteData {
     /// Returns tint color, or white color if none
     pub fn tint_or_white(&self) -> Color {
         self.tint.unwrap_or(WHITE)
+    }
+
+    pub fn texture(&self) -> AtomicRef<Texture2D> {
+        AtomicRef::map(texture_handles().borrow(), |m| {
+            m.get(self.sprite.0.as_str()).unwrap()
+        })
+    }
+
+    pub fn texture_id(&self) -> TextureId {
+        texture_handles()
+            .borrow()
+            .get(self.sprite.0.as_str())
+            .unwrap()
+            .raw_miniquad_id()
     }
 }
 
