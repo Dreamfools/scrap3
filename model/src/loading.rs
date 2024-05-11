@@ -1,4 +1,5 @@
 use crate::assets::sprite::texture_handles;
+use crate::loading::staggerer::Staggerer;
 use crate::registry::{PartialRegistry, Registry, RegistryItemSerialized};
 use crate::SpriteId;
 use assets_manager::loader::{BytesLoader, LoadFrom};
@@ -12,6 +13,9 @@ use scrapcore_serialization::registry::PartialRegistry as _;
 use scrapcore_serialization::serialization::error::{
     DeserializationError, DeserializationErrorKind, DeserializationErrorStackItem,
 };
+use std::time::Duration;
+
+mod staggerer;
 
 struct ImageBytes(Vec<u8>);
 
@@ -41,6 +45,7 @@ pub struct LoadedMod<'a> {
     items: &'a ItemsHandle,
     images: &'a ImagesHandle,
 
+    hot_reload_stagger: Staggerer,
     want_full_reload: bool,
 }
 
@@ -71,6 +76,11 @@ impl<'a> LoadedMod<'a> {
         self.update_images::<false>().map_err(err_m)?;
 
         if self.want_files_hot_reload().map_err(err_m)? {
+            println!("[Scrap3 Model]: File reload detected, queueing hot reload");
+            self.hot_reload_stagger.trigger();
+        }
+
+        if self.hot_reload_stagger.activated() {
             // TODO: stagger loading by a couple of frames, in case of multiple file updates
             println!("[Scrap3 Model]: Hot reloading data files");
             match Self::load_mod_inner(self.cache, Some(&self.registry)) {
@@ -83,6 +93,7 @@ impl<'a> LoadedMod<'a> {
                 }
                 Err(err) => {
                     if err.is_hot_reload_blocker() {
+                        println!("[Scrap3 Model]: Full reload is required");
                         self.want_full_reload = true;
                     } else {
                         return Err(diagnostic(err));
@@ -140,6 +151,10 @@ impl<'a> LoadedMod<'a> {
             cache,
             items: item_handles,
             images: image_handles,
+            hot_reload_stagger: Staggerer::new(
+                Duration::from_millis(150),
+                Duration::from_millis(1000),
+            ),
             want_full_reload: false,
         };
 
