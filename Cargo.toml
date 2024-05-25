@@ -25,18 +25,22 @@ egui = "0.24.1"
 enum_decompose = { git = "https://github.com/juh9870/enum_decompose.git", rev = "v1.0.0", package = "enum_decompose" }
 features = "0.10.0"
 fs-err = "2.11.0"
+getrandom = "0.2"
 glam = "0.24.2"
 inline_tweak = "1.1.1"
 insta = "1.36.1"
 itertools = "0.12.1"
+libm = "0.2"
 lockfree-object-pool = "0.1.5"
-macroquad = "0.4.5"
+macroquad = { version = "0.4.5", default-features = false }
 miette = "7"
 ndshape = "0.3.0"
 nohash-hasher = "0.2.0"
 proc-macro2 = "1.0.79"
 proptest = "1.4.0"
 quote = "1.0.35"
+rand = { version = "0.8", default-features = false }
+rand_pcg = "0.3"
 regex = "1.0.0"
 rstest = "0.18.2"
 schemars = "0.8"
@@ -61,6 +65,9 @@ yakui-miniquad = { path = "externals/yakui-miniquad" }
 #
 #[patch.'https://github.com/juh9870/yakui-macroquad.git']
 #yakui-macroquad = { path = "externals/yakui-macroquad" }
+
+[workspace.lints.clippy]
+disallowed_methods = "forbid"
 
 [profile.release]
 opt-level = 3

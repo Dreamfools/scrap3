@@ -8,12 +8,12 @@ pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32, flip: bool) -> (Vec2,
 
     let s = bulge * distance / 2.0;
 
-    let radius = ((distance / 2.0).powi(2) + s.powi(2)) / (2.0 * s);
+    let radius = (libm::powf(distance / 2.0, 2.0) + libm::powf(s, 2.0)) / (2.0 * s);
 
-    let arc = 4.0 * bulge.atan();
+    let arc = 4.0 * libm::atanf(bulge);
 
-    let c_x = radius * (arc / 2.0 - std::f32::consts::FRAC_PI_2).cos();
-    let mut c_y = -radius * (arc / 2.0 - std::f32::consts::FRAC_PI_2).sin();
+    let c_x = radius * libm::cosf(arc / 2.0 - std::f32::consts::FRAC_PI_2);
+    let mut c_y = -radius * libm::sinf(arc / 2.0 - std::f32::consts::FRAC_PI_2);
     if flip {
         c_y = -c_y;
     }
@@ -31,13 +31,13 @@ pub fn arc_angles(
     to: Vec2,
     flip: bool,
 ) -> (f32, f32) {
-    let arc = 4.0 * bulge.atan();
+    let arc = 4.0 * libm::atanf(bulge);
     let anchor = if flip { to } else { from };
 
     let starting_angle = if center.y < anchor.y {
-        ((anchor.x - center.x) / radius).clamp(-1.0, 1.0).acos()
+        libm::acosf(((anchor.x - center.x) / radius).clamp(-1.0, 1.0))
     } else {
-        ((anchor.x - center.x) / radius).clamp(-1.0, 1.0).asin() - std::f32::consts::FRAC_PI_2
+        libm::asinf(((anchor.x - center.x) / radius).clamp(-1.0, 1.0)) - std::f32::consts::FRAC_PI_2
     };
     let end_angle = starting_angle + arc;
     (starting_angle, end_angle)

@@ -20,3 +20,6 @@ thiserror = { workspace = true }
 [features]
 # Exposes serialized versions of data and registry
 full = []
+
+[lints]
+workspace = true

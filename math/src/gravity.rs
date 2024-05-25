@@ -3,10 +3,10 @@ pub fn fall_time(height: f32, g: f32) -> f32 {
     (2.0 * height / g).sqrt()
 }
 
-/// Calculate the height at a certain progress of falling
+/// Calculate the height at certain progress of falling
 pub fn height_at_fall_progress(initial_height: f32, g: f32, progress: f32) -> f32 {
     let time = fall_time(initial_height, g);
-    initial_height - g * (progress * time).powi(2) / 2.0
+    initial_height - g * libm::powf(progress * time, 2.0) / 2.0
 }
 
 /// Calculate the gravity from the height and the time it takes to fall

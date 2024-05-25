@@ -11,3 +11,6 @@ egui = { workspace = true }
 
 [features]
 release-tweak = []
+
+[lints]
+workspace = true

@@ -6,9 +6,13 @@ edition = "2021"
 
 [dependencies]
 glam = { workspace = true }
+libm = { workspace = true }
 
 [dev-dependencies]
 approx = { workspace = true }
 proptest = { workspace = true }
 tinyrand = { workspace = true }
 tinyrand-std = { workspace = true }
+
+[lints]
+workspace = true

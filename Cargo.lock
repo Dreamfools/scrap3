@@ -1449,6 +1449,8 @@ dependencies = [
 name = "game"
 version = "0.1.0"
 dependencies = [
+ "enum_decompose",
+ "getrandom",
  "macroquad",
  "miette",
  "model",
@@ -2073,6 +2075,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
 
 [[package]]
+name = "luck"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "rand_pcg",
+]
+
+[[package]]
 name = "mach2"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2146,6 +2156,7 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "glam 0.24.2",
+ "libm",
  "proptest",
  "tinyrand",
  "tinyrand-std",
@@ -2952,6 +2963,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "rand_pcg"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59cad018caf63deb318e5a4586d99a24424a364f40f1e5778c29aca23f4fc73e"
+dependencies = [
+ "rand_core",
 ]
 
 [[package]]

@@ -30,3 +30,6 @@ char-board = ["dep:colored"]
 [[bench]]
 name = "match3"
 harness = false
+
+[lints]
+workspace = true
