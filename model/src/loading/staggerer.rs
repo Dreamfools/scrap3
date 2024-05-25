@@ -39,12 +39,12 @@ impl Staggerer {
             return false;
         };
 
-        return if Instant::now() > last_trigger.add(self.delay) {
+        if Instant::now() > last_trigger.add(self.delay) {
             self.last_trigger = None;
             self.earliest_next_activation = Instant::now() + self.min_interval;
             true
         } else {
             false
-        };
+        }
     }
 }

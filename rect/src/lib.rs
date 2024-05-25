@@ -663,7 +663,7 @@ pub enum RectCutSide {
 /// user to fix the side and pass the rect-and-side together
 /// into other code.
 #[derive(Copy, Clone, Debug)]
-struct RectCut {
+pub struct RectCut {
     pub rect: Rect,
     pub side: RectCutSide,
 }

@@ -1,6 +1,5 @@
 use crate::assets::sprite::SpriteId;
 use crate::{collections, singletons};
-use macroquad::prelude::Texture2D;
 use scrapcore_serialization::derive::registry;
 use scrapcore_serialization::registry::SerializationRegistry;
 use scrapcore_serialization::serialization::error::{

@@ -5,6 +5,7 @@ use crate::SpriteId;
 use assets_manager::loader::{BytesLoader, LoadFrom};
 use assets_manager::{loader, Asset, AssetCache, Compound, Handle, RecursiveDirectory};
 use itertools::Itertools;
+use macroquad::logging::{debug, info, trace, warn};
 use macroquad::prelude::Texture2D;
 use miette::Report;
 use scrapcore_serialization::registry::insert::asset_insert;
@@ -76,13 +77,13 @@ impl<'a> LoadedMod<'a> {
         self.update_images::<false>().map_err(err_m)?;
 
         if self.want_files_hot_reload().map_err(err_m)? {
-            println!("[Scrap3 Model]: File reload detected, queueing hot reload");
+            trace!("[Scrap3 Model]: File reload detected, queueing hot reload");
             self.hot_reload_stagger.trigger();
         }
 
         if self.hot_reload_stagger.activated() {
             // TODO: stagger loading by a couple of frames, in case of multiple file updates
-            println!("[Scrap3 Model]: Hot reloading data files");
+            info!("[Scrap3 Model]: Hot reloading data files");
             match Self::load_mod_inner(self.cache, Some(&self.registry)) {
                 Ok(loaded) => {
                     // Essentially a full reload but we keep IDs
@@ -93,7 +94,7 @@ impl<'a> LoadedMod<'a> {
                 }
                 Err(err) => {
                     if err.is_hot_reload_blocker() {
-                        println!("[Scrap3 Model]: Full reload is required");
+                        warn!("[Scrap3 Model]: Full reload is required");
                         self.want_full_reload = true;
                     } else {
                         return Err(diagnostic(err));
@@ -176,7 +177,7 @@ impl<'a> LoadedMod<'a> {
             let handle = data?;
             if FORCE || handle.reloaded_global() {
                 if !FORCE {
-                    println!("[Scrap3 Model]: Updating image `{}`", handle.id());
+                    debug!("[Scrap3 Model]: Updating image `{}`", handle.id());
                 }
                 changes.push(handle);
             }
