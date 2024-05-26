@@ -1,3 +1,4 @@
+use crate::lib_ext::FloatLibmExt;
 use glam::{vec2, Vec2};
 
 // https://math.stackexchange.com/questions/482751/how-do-i-move-through-an-arc-between-two-specific-points
@@ -8,12 +9,12 @@ pub fn arc_center_radius(from: Vec2, to: Vec2, bulge: f32, flip: bool) -> (Vec2,
 
     let s = bulge * distance / 2.0;
 
-    let radius = (libm::powf(distance / 2.0, 2.0) + libm::powf(s, 2.0)) / (2.0 * s);
+    let radius = ((distance / 2.0).powi_m(2) + s.powi_m(2)) / (2.0 * s);
 
-    let arc = 4.0 * libm::atanf(bulge);
+    let arc = 4.0 * bulge.atan_m();
 
-    let c_x = radius * libm::cosf(arc / 2.0 - std::f32::consts::FRAC_PI_2);
-    let mut c_y = -radius * libm::sinf(arc / 2.0 - std::f32::consts::FRAC_PI_2);
+    let c_x = radius * (arc / 2.0 - core::f32::consts::FRAC_PI_2).cos_m();
+    let mut c_y = -radius * (arc / 2.0 - core::f32::consts::FRAC_PI_2).sin_m();
     if flip {
         c_y = -c_y;
     }
@@ -31,13 +32,13 @@ pub fn arc_angles(
     to: Vec2,
     flip: bool,
 ) -> (f32, f32) {
-    let arc = 4.0 * libm::atanf(bulge);
+    let arc = 4.0 * bulge.atan_m();
     let anchor = if flip { to } else { from };
 
     let starting_angle = if center.y < anchor.y {
-        libm::acosf(((anchor.x - center.x) / radius).clamp(-1.0, 1.0))
+        ((anchor.x - center.x) / radius).clamp(-1.0, 1.0).acos_m()
     } else {
-        libm::asinf(((anchor.x - center.x) / radius).clamp(-1.0, 1.0)) - std::f32::consts::FRAC_PI_2
+        ((anchor.x - center.x) / radius).clamp(-1.0, 1.0).asin_m() - core::f32::consts::FRAC_PI_2
     };
     let end_angle = starting_angle + arc;
     (starting_angle, end_angle)

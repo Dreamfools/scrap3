@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["asset_macro", "egui-tweak", "game", "game_comfy", "match3", "math", "model", "rect", "with_setter_macro"]
+members = ["asset_macro", "egui-tweak", "game", "game_comfy", "luck", "match3", "math", "model", "rect", "with_setter_macro"]
 exclude = ["externals/scrapcore_serialization", "externals/yakui-macroquad", "externals/yakui-miniquad"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -26,7 +26,7 @@ enum_decompose = { git = "https://github.com/juh9870/enum_decompose.git", rev = 
 features = "0.10.0"
 fs-err = "2.11.0"
 getrandom = "0.2"
-glam = "0.24.2"
+glam = { version = "0.24.2", features = ["libm"] }
 inline_tweak = "1.1.1"
 insta = "1.36.1"
 itertools = "0.12.1"

@@ -7,7 +7,11 @@ use model::LoadedMod;
 use std::fmt::Display;
 use std::process::exit;
 use thiserror::Error;
+use yakui::{constrained, offset, Constraints, Vec2};
 
+pub mod random;
+pub mod state;
+pub mod ui;
 pub mod user_textures;
 
 #[macroquad::main("scrap3")]
@@ -44,10 +48,14 @@ async fn main() {
                 yakui::pad(yakui::widgets::Pad::all(16.0), || {
                     let size = registry.settings.logo.texture().size();
                     let ar = size.x / size.y;
-                    yakui::image(
-                        registry.settings.logo.yakui_id(),
-                        yakui::geometry::Vec2::new(128.0 * ar, 128.0),
-                    );
+                    constrained(Constraints::tight(Vec2::new(128.0 * ar, 128.0)), || {
+                        offset(Vec2::new(128.0, 0.0), || {
+                            yakui::image(
+                                registry.settings.logo.yakui_id(),
+                                yakui::geometry::Vec2::new(128.0 * ar, 128.0),
+                            );
+                        });
+                    });
                 });
             });
         });
