@@ -13,7 +13,10 @@ pub enum Registry {
     Settings(singletons::settings::ModSettings),
 
     #[model(collection)]
-    GemColor(collections::gem::GemColor),
+    Action(collections::actions::ActionOrChain),
+
+    #[model(collection)]
+    GemColor(collections::gem::GemColorModel),
 
     #[model(asset)]
     Textures(SpriteId),

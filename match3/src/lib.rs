@@ -34,9 +34,9 @@ pub trait MatchColor: Debug + Clone + Default {
 
     /// Hints to the matcher that the color should not be checked for matching
     ///
-    /// This method is mainly for performance optimization and matchers may
-    /// ignore it, so the actual matching logic should be handled by the
-    /// [matches] and [can_start_match] methods
+    /// This method is mainly for performance optimization and matchers are
+    /// free to ignore it, so the actual matching logic should be handled by
+    /// the [matches] and [can_start_match] methods
     fn hint_is_unmatchable(&self) -> bool {
         false
     }
@@ -68,6 +68,20 @@ impl<Color: MatchColor> Debug for BoardMatch<Color> {
             .field("color", &self.color)
             .field("cells", self.cells.deref())
             .finish()
+    }
+}
+
+impl<Color: MatchColor> Clone for BoardMatch<Color> {
+    fn clone(&self) -> Self {
+        let mut cells = get_board_match_pool().pull();
+        cells.reserve_exact(self.cells.len());
+        for (i, pos) in self.cells.iter().copied().enumerate() {
+            cells[i] = pos;
+        }
+        Self {
+            color: self.color.clone(),
+            cells,
+        }
     }
 }
 

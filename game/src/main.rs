@@ -8,6 +8,8 @@ use std::fmt::Display;
 use std::process::exit;
 use thiserror::Error;
 use yakui::{constrained, offset, Constraints, Vec2};
+use yakui_tweak::editor::edit_tweakables;
+use yakui_tweak::tweak;
 
 pub mod random;
 pub mod state;
@@ -40,25 +42,30 @@ async fn main() {
         yakui_macroquad::start();
 
         yakui_macroquad::cfg(|yak| {
-            yak.set_scale_factor(screen_height() / 1080.0);
+            yak.set_scale_factor(screen_height() / tweak("Screen Height", 600.0));
         });
 
         yakui::center(|| {
             yakui::colored_box_container(yakui::Color::CORNFLOWER_BLUE, || {
-                yakui::pad(yakui::widgets::Pad::all(16.0), || {
-                    let size = registry.settings.logo.texture().size();
-                    let ar = size.x / size.y;
-                    constrained(Constraints::tight(Vec2::new(128.0 * ar, 128.0)), || {
-                        offset(Vec2::new(128.0, 0.0), || {
-                            yakui::image(
-                                registry.settings.logo.yakui_id(),
-                                yakui::geometry::Vec2::new(128.0 * ar, 128.0),
-                            );
+                yakui::column(|| {
+                    yakui::textbox("test");
+                    yakui::pad(yakui::widgets::Pad::all(16.0), || {
+                        let size = registry.settings.logo.texture().size();
+                        let ar = size.x / size.y;
+                        constrained(Constraints::tight(Vec2::new(128.0 * ar, 128.0)), || {
+                            offset(Vec2::new(128.0, 0.0), || {
+                                yakui::image(
+                                    registry.settings.logo.yakui_id(),
+                                    yakui::geometry::Vec2::new(128.0 * ar, 128.0),
+                                );
+                            });
                         });
                     });
                 });
             });
         });
+
+        edit_tweakables();
 
         yakui_macroquad::finish();
 

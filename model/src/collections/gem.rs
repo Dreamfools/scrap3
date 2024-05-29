@@ -6,13 +6,13 @@ use scrapcore_serialization::derive::DatabaseModel;
 use scrapcore_serialization::ItemId;
 
 #[derive(Debug, DatabaseModel)]
-pub struct GemColor {
+pub struct GemColorModel {
     pub sprite: SpriteData,
 }
 
 /// Modifiers for gems, like "enchanted"
 #[derive(Debug, DatabaseModel)]
-pub struct GemModifier {
+pub struct GemModifierModel {
     /// Sprite overlay for the gem
     pub overlay: SpriteData,
     /// Custom sprite replacements for each color

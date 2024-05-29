@@ -2,18 +2,18 @@ use crate::chances::chances;
 use crate::LuckState;
 
 #[derive(Debug, Clone)]
-pub struct RandomPool<Item: Clone> {
+pub struct RandomPool<Item> {
     choices: Vec<Item>,
     weights: Vec<u64>,
 }
 
-impl<Item: Clone> RandomPool<Item> {
+impl<Item> RandomPool<Item> {
     pub fn new(choices: Vec<Item>, weights: Vec<u64>) -> Self {
         Self { choices, weights }
     }
 }
 
-impl<Item: Clone> RandomPool<Item> {
+impl<Item> RandomPool<Item> {
     pub fn from_weights<Weight: PoolWeight>(
         choices: impl IntoIterator<Item = (Weight, Item)>,
     ) -> Self {

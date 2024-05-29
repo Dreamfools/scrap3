@@ -4,6 +4,7 @@ mod assets {
 }
 
 mod collections {
+    pub mod actions;
     pub mod gem;
 }
 
@@ -22,7 +23,8 @@ pub use registry::{Registry, RegistryAssetKind, RegistryError, RegistryItem, Reg
 pub use assets::color::ColorData;
 pub use assets::sprite::{SpriteData, SpriteId};
 
-pub use collections::gem::{GemColor, GemModifier};
+pub use collections::actions::{ActionEffect, ActionOrChain, ChainType, CombatActionChain};
+pub use collections::gem::{GemColorModel, GemModifierModel};
 
 pub use singletons::settings::ModSettings;
 

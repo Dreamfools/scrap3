@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["asset_macro", "egui-tweak", "game", "game_comfy", "luck", "match3", "math", "model", "rect", "with_setter_macro"]
+members = ["asset_macro", "egui-tweak", "game", "luck", "match3", "math", "model", "rect", "with_setter_macro", "yakui_tweak", "yakui_widgets_plus"]
 exclude = ["externals/scrapcore_serialization", "externals/yakui-macroquad", "externals/yakui-miniquad"]
 default-members = ["game"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -21,18 +21,18 @@ darling = "0.20.8"
 derive = "1.0.0"
 downcast-rs = "1.2.0"
 duplicate = "1"
-egui = "0.24.1"
+egui = "0.27"
 enum_decompose = { git = "https://github.com/juh9870/enum_decompose.git", rev = "v1.0.0", package = "enum_decompose" }
 features = "0.10.0"
 fs-err = "2.11.0"
 getrandom = "0.2"
-glam = { version = "0.24.2", features = ["libm"] }
+glam = { version = "0.27", features = ["libm"] }
 inline_tweak = "1.1.1"
 insta = "1.36.1"
 itertools = "0.12.1"
 libm = "0.2"
 lockfree-object-pool = "0.1.5"
-macroquad = { version = "0.4.5", default-features = false }
+macroquad = { version = "0.4.7", default-features = false }
 miette = "7"
 ndshape = "0.3.0"
 nohash-hasher = "0.2.0"
@@ -48,17 +48,25 @@ scrapcore_serialization = { path = "externals/scrapcore_serialization/scrapcore_
 serde = "1.0.197"
 serde_json5 = "0.1.0"
 simple-easing = "1.0.1"
+glamour = { version = "0.11.1", features = ["scalar-math"] }
 smallvec = "1.13.2"
 strum = "0.26.2"
 syn = "2.0.55"
 thiserror = "1"
 tinyrand = "0.5.0"
 tinyrand-std = "0.5.0"
-yakui = { git = "https://github.com/SecondHalfGames/yakui.git", rev = "2ea1ecc691b2391d237502637d707d0e2fee15fc" }
+yakui = { git = "https://github.com/SecondHalfGames/yakui.git", rev = "7346eb7bc011c95fb82502dacecb92f086389474" }
 yakui-macroquad = { path = "externals/yakui-macroquad" }
 yakui-miniquad = { path = "externals/yakui-miniquad" }
 # Workspace Crates
 model = { path = "model" }
+match3 = { path = "match3" }
+math = { path = "math" }
+rect = { path = "rect" }
+egui-tweak = { path = "egui-tweak" }
+yakui_widgets_plus = { path = "yakui_widgets_plus" }
+with_setter_macro = { path = "with_setter_macro" }
+yakui_tweak = { path = "yakui_tweak" }
 
 [patch.'https://github.com/juh9870/yakui-miniquad.git']
 yakui-miniquad = { path = "externals/yakui-miniquad" }

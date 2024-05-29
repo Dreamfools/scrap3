@@ -32,6 +32,7 @@ in mkShell.override {
     pkgs.cargo-flamegraph
     pkgs.cargo-insta
     pkgs.cargo-audit
+    pkgs.cargo-expand
     pkgs.pre-commit
   ];
   shellHook = ''

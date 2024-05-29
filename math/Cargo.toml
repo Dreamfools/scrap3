@@ -6,7 +6,9 @@ edition = "2021"
 
 [dependencies]
 glam = { workspace = true }
+glamour = { workspace = true }
 libm = { workspace = true }
+ndshape = { workspace = true }
 
 [dev-dependencies]
 approx = { workspace = true }

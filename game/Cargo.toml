@@ -8,11 +8,15 @@ edition = "2021"
 enum_decompose = { workspace = true }
 getrandom = { workspace = true, features = ["js"] }
 macroquad = { workspace = true }
+match3 = { workspace = true }
+math = { workspace = true }
 miette = { workspace = true, features = ["fancy-no-syscall"] }
 model = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
 yakui = { workspace = true }
 yakui-macroquad = { workspace = true }
+yakui_tweak = { workspace = true }
 
 [package.metadata.cargo-machete]
 ignored = ["getrandom"]

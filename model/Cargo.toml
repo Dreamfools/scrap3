@@ -8,6 +8,7 @@ ahash = { workspace = true, features = ["serde"] }
 assets_manager = { workspace = true, features = ["json", "hot-reloading"] }
 atomic_refcell = { workspace = true }
 csscolorparser = { workspace = true }
+enum_decompose = { workspace = true }
 itertools = { workspace = true }
 macroquad = { workspace = true, default-features = false }
 miette = { workspace = true }
