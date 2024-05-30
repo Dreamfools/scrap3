@@ -1,13 +1,15 @@
-use crate::user_textures::{clear_user_textures, SpriteDataExt};
+use crate::state::combat::CombatState;
+use crate::ui::board::board;
+use crate::user_textures::clear_user_textures;
 use macroquad::color::WHITE;
 use macroquad::prelude::{clear_background, next_frame, screen_height};
+use macroquad::time::get_time;
 use miette::{Diagnostic, IntoDiagnostic, Report};
 use model::assets_manager::AssetCache;
 use model::LoadedMod;
 use std::fmt::Display;
 use std::process::exit;
 use thiserror::Error;
-use yakui::{constrained, offset, Constraints, Vec2};
 use yakui_tweak::editor::edit_tweakables;
 use yakui_tweak::tweak;
 
@@ -34,6 +36,7 @@ async fn main() {
         });
 
         let registry = mod_data.registry();
+        let state = CombatState::new(registry);
 
         clear_user_textures();
 
@@ -46,23 +49,24 @@ async fn main() {
         });
 
         yakui::center(|| {
-            yakui::colored_box_container(yakui::Color::CORNFLOWER_BLUE, || {
-                yakui::column(|| {
-                    yakui::textbox("test");
-                    yakui::pad(yakui::widgets::Pad::all(16.0), || {
-                        let size = registry.settings.logo.texture().size();
-                        let ar = size.x / size.y;
-                        constrained(Constraints::tight(Vec2::new(128.0 * ar, 128.0)), || {
-                            offset(Vec2::new(128.0, 0.0), || {
-                                yakui::image(
-                                    registry.settings.logo.yakui_id(),
-                                    yakui::geometry::Vec2::new(128.0 * ar, 128.0),
-                                );
-                            });
-                        });
-                    });
-                });
-            });
+            board(&state, registry, get_time());
+            // yakui::colored_box_container(yakui::Color::CORNFLOWER_BLUE, || {
+            //     yakui::column(|| {
+            //         yakui::textbox("test");
+            //         yakui::pad(yakui::widgets::Pad::all(16.0), || {
+            //             let size = registry.settings.logo.texture().size();
+            //             let ar = size.x / size.y;
+            //             constrained(Constraints::tight(Vec2::new(128.0 * ar, 128.0)), || {
+            //                 offset(Vec2::new(128.0, 0.0), || {
+            //                     yakui::image(
+            //                         registry.settings.logo.yakui_id(),
+            //                         Vec2::new(128.0 * ar, 128.0),
+            //                     );
+            //                 });
+            //             });
+            //         });
+            //     });
+            // });
         });
 
         edit_tweakables();

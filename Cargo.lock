@@ -765,15 +765,21 @@ dependencies = [
 name = "game"
 version = "0.1.0"
 dependencies = [
+ "ahash",
  "enum_decompose",
  "getrandom",
+ "inline_tweak",
+ "luck",
  "macroquad",
  "match3",
  "math",
  "miette",
  "model",
+ "send_wrapper",
+ "simple-easing",
  "strum",
  "thiserror",
+ "with_setter_macro",
  "yakui",
  "yakui-macroquad",
  "yakui_tweak",
@@ -913,8 +919,22 @@ version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6acddbefae08bfba73e27f55513f491f35c365d84bf3002bf85ba9b916c5e5f"
 dependencies = [
+ "inline_tweak_derive",
  "lazy_static",
+ "proc-macro2",
  "rustc-hash",
+ "syn 2.0.55",
+]
+
+[[package]]
+name = "inline_tweak_derive"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46d62a0a3b6af04d4eee8e7251cd758ce74b0ed86253d3e4ac8a1b297a75f4a0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.55",
 ]
 
 [[package]]
@@ -1975,6 +1995,12 @@ name = "similar"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32fea41aca09ee824cc9724996433064c89f7777e60762749a4170a14abbfa21"
+
+[[package]]
+name = "simple-easing"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "832ddd7df0d98d6fd93b973c330b7c8e0742d5cb8f1afc7dea89dba4d2531aa1"
 
 [[package]]
 name = "siphasher"

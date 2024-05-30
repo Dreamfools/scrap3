@@ -108,7 +108,7 @@ impl<Color: MatchColor> BoardMatch<Color> {
     }
 }
 
-#[derive(Debug, Clone, Default, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
 pub struct SimpleGem<C: MatchColor>(pub C);
 
 impl<C: MatchColor> BoardGem for SimpleGem<C> {

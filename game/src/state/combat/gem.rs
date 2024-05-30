@@ -1,8 +1,9 @@
 use match3::SimpleGem;
+use strum::EnumIs;
 
 pub type Gem = SimpleGem<GemColor>;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, EnumIs)]
 pub enum GemColor {
     #[default]
     Empty,

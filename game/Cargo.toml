@@ -5,15 +5,21 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ahash = { workspace = true }
 enum_decompose = { workspace = true }
 getrandom = { workspace = true, features = ["js"] }
+inline_tweak = { workspace = true, features = ["derive"] }
+luck = { workspace = true }
 macroquad = { workspace = true }
 match3 = { workspace = true }
 math = { workspace = true }
 miette = { workspace = true, features = ["fancy-no-syscall"] }
 model = { workspace = true }
+send_wrapper = { workspace = true }
+simple-easing = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
+with_setter_macro = { workspace = true }
 yakui = { workspace = true }
 yakui-macroquad = { workspace = true }
 yakui_tweak = { workspace = true }

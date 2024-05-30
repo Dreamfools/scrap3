@@ -11,9 +11,7 @@ impl<Item> RandomPool<Item> {
     pub fn new(choices: Vec<Item>, weights: Vec<u64>) -> Self {
         Self { choices, weights }
     }
-}
 
-impl<Item> RandomPool<Item> {
     pub fn from_weights<Weight: PoolWeight>(
         choices: impl IntoIterator<Item = (Weight, Item)>,
     ) -> Self {
@@ -24,7 +22,18 @@ impl<Item> RandomPool<Item> {
         Self::new(items, weights)
     }
 
+    pub fn equal(choices: Vec<Item>) -> Self {
+        Self {
+            weights: vec![1; choices.len()],
+            choices,
+        }
+    }
+
     pub fn get(&self, state: &mut LuckState) -> &Item {
+        #[cfg(debug_assertions)]
+        if self.choices.is_empty() {
+            panic!("Sampling from empty pool")
+        }
         &self.choices[chances(state, &self.weights, None)]
     }
 }

@@ -45,6 +45,7 @@ regex = "1.0.0"
 rstest = "0.18.2"
 schemars = "0.8"
 scrapcore_serialization = { path = "externals/scrapcore_serialization/scrapcore_serialization" }
+slabmap = { path = "externals/scrapcore_serialization/slabmap" }
 serde = "1.0.197"
 serde_json5 = "0.1.0"
 simple-easing = "1.0.1"
@@ -54,6 +55,7 @@ strum = "0.26.2"
 syn = "2.0.55"
 thiserror = "1"
 tinyrand = "0.5.0"
+send_wrapper = "0.6"
 tinyrand-std = "0.5.0"
 yakui = { git = "https://github.com/SecondHalfGames/yakui.git", rev = "7346eb7bc011c95fb82502dacecb92f086389474" }
 yakui-macroquad = { path = "externals/yakui-macroquad" }
@@ -67,6 +69,7 @@ egui-tweak = { path = "egui-tweak" }
 yakui_widgets_plus = { path = "yakui_widgets_plus" }
 with_setter_macro = { path = "with_setter_macro" }
 yakui_tweak = { path = "yakui_tweak" }
+luck = { path = "luck" }
 
 [patch.'https://github.com/juh9870/yakui-miniquad.git']
 yakui-miniquad = { path = "externals/yakui-miniquad" }

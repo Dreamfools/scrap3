@@ -32,6 +32,7 @@ pub use loading::LoadedMod;
 
 // Re-exports
 pub use assets_manager;
+pub use scrapcore_serialization;
 
 #[cfg(feature = "full")]
 pub mod full {
