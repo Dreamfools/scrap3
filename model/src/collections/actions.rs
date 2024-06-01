@@ -37,8 +37,10 @@ pub enum ChainType {
 /// Gathering stack, where events resolve from the top of the stack to the
 /// bottom, and new actions can appear on top of the stack during the process
 ///
-/// Some actions are not intended to be used by
+/// Some actions are not intended to be used by mod makers
 #[decompose]
 #[derive(Debug, Clone, DatabaseModel)]
 #[model_serde(tag = "type")]
-pub enum ActionEffect {}
+pub enum ActionEffect {
+    DebugLog { message: String },
+}

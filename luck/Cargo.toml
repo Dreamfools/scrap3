@@ -5,7 +5,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rand = { workspace = true, default-features = false }
+rand = { workspace = true, default-features = false, features = ["getrandom"] }
 rand_pcg = { workspace = true }
 
 [lints]

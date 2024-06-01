@@ -21,8 +21,6 @@ impl Hash for MatchIndex {
 
 impl IsEnabled for MatchIndex {}
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
-struct BoardIndex(usize);
 #[derive(Debug, Clone)]
 pub struct LineMatcherSettings {
     /// Minimum line size

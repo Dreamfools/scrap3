@@ -5,7 +5,7 @@ use macroquad::color::WHITE;
 use macroquad::prelude::{clear_background, next_frame, screen_height};
 use macroquad::time::get_time;
 use miette::{Diagnostic, IntoDiagnostic, Report};
-use model::assets_manager::AssetCache;
+use model::assets_manager::{source, AssetCache};
 use model::LoadedMod;
 use std::fmt::Display;
 use std::process::exit;
@@ -18,13 +18,22 @@ pub mod state;
 pub mod ui;
 pub mod user_textures;
 
+#[cfg(target_arch = "wasm32")]
+mod getrandom_on_web;
+
 #[macroquad::main("scrap3")]
 async fn main() {
-    println!("Cur dir: {}", std::env::current_dir().unwrap().display());
+    // println!("Cur dir: {}", std::env::current_dir().unwrap().display());
 
-    let cache = AssetCache::new("game/mod")
+    #[cfg(not(target_arch = "wasm32"))]
+    let source = source::FileSystem::new("game/mod")
         .into_diagnostic()
-        .unwrap_or_else(|e| todo!("Handle AssetCache::new error: {}", e));
+        .unwrap_or_else(|e| exit_on_error(e, "Failed to load mod"));
+
+    #[cfg(target_arch = "wasm32")]
+    let source = source::Embedded::from(source::embed!("game/mod"));
+
+    let cache = AssetCache::with_source(source);
 
     let mut mod_data =
         LoadedMod::load_mod(&cache).unwrap_or_else(|e| exit_on_error(e, "Failed to load mod"));
@@ -74,6 +83,11 @@ async fn main() {
         yakui_macroquad::finish();
 
         yakui_macroquad::draw();
+
+        // let s: &RegistryEntry<GemColorModel> = &registry.gem_color
+        //     [slabmap::SlabMapUntypedId::from_raw_unchecked(0).as_typed_unchecked()];
+        // let tx = s.data.sprite.texture2d();
+        // draw_texture(&tx, 0.0, 0.0, WHITE);
 
         next_frame().await;
     }

@@ -1,9 +1,8 @@
 use duplicate::duplicate_item;
 use std::fmt::Display;
 use std::str::FromStr;
-use yakui::widgets::List;
-use yakui::{checkbox, label, textbox, use_state, MainAxisSize};
-use yakui_widgets_plus::list_ext::{row_shrink, ListExt};
+use yakui::{checkbox, label, textbox, use_state};
+use yakui_widgets_plus::list_ext::row_shrink;
 
 use crate::Tweakable;
 

@@ -13,7 +13,6 @@ use model::{GemColorModel, Registry};
 use crate::state::combat::anim::{BoardView, BoardViewRect, GemDrawInfo};
 use crate::state::combat::gem::{Gem, GemColor};
 use crate::state::combat::{CombatInput, CombatState};
-use crate::user_textures::SpriteDataExt;
 
 pub fn board(state: &CombatState, registry: &Registry, time: f64) -> Response<Vec<CombatInput>> {
     widget::<BoardWidget>((state, registry, time))
@@ -26,19 +25,26 @@ pub struct BoardWidget {
 }
 
 impl BoardWidget {
-    pub fn draw(&mut self, registry: &Registry, gem: &Gem, draw: GemDrawInfo) {
+    pub fn draw(&mut self, registry: &Registry, gem: &Gem, mut draw: GemDrawInfo) {
         let GemColor::Color(color) = gem.color() else {
             // Skip drawing empty gems
             return;
         };
 
-        if draw.opacity == 0.0 {
+        let color = RegistryIndex::<GemColorModel>::get(&color, registry);
+        let sprite = &color.sprite;
+
+        if let Some(mut tint) = sprite.tint {
+            tint.a = draw.tint.a;
+            draw.tint = tint;
+        }
+
+        if draw.tint.a == 0.0 {
             // Skip drawing fully transparent gems
             return;
         }
 
-        let color = RegistryIndex::<GemColorModel>::get(&color, registry);
-        let id = color.sprite.yakui_id();
+        let id = sprite.yakui_texture();
         self.draw_calls.push((id, draw));
     }
 }
@@ -151,6 +157,9 @@ impl Widget for BoardWidget {
 
             let mut paint = PaintRect::new(rect);
             paint.texture = Some((*id, Rect::ONE));
+            let color = draw.tint.to_vec();
+            paint.color = yakui::Color::from_linear(color);
+            // paint.color = Color::rgb(0xFF, 0x10, 0x0);
             paint.add(ctx.paint);
         }
     }

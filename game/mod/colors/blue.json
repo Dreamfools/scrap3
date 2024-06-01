@@ -1,0 +1,8 @@
+{
+  "type": "GemColor",
+  "id": "blue",
+  "sprite": {
+    "sprite": "Gem Type2 Black",
+    "tint": "#0FF"
+  }
+}

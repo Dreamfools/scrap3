@@ -9,6 +9,7 @@ assets_manager = { workspace = true, features = ["json", "hot-reloading"] }
 atomic_refcell = { workspace = true }
 csscolorparser = { workspace = true }
 enum_decompose = { workspace = true }
+image = { workspace = true, default-features = false, features = ["png"] }
 itertools = { workspace = true }
 macroquad = { workspace = true, default-features = false }
 miette = { workspace = true }
@@ -17,6 +18,8 @@ schemars = { workspace = true }
 scrapcore_serialization = { workspace = true, features = ["derive", "miette", "macroquad"] }
 serde = { workspace = true }
 thiserror = { workspace = true }
+yakui = { workspace = true }
+yakui-macroquad = { workspace = true }
 
 [features]
 # Exposes serialized versions of data and registry

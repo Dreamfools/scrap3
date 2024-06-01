@@ -19,6 +19,7 @@ in mkShell.override {
   nativeBuildInputs = with pkgs; [
     (rustChannels.stable.rust.override {
       extensions = [ "rust-src" "rust-analysis" ];
+      targets = ["x86_64-unknown-linux-gnu" "wasm32-unknown-unknown"];
     })
     pkg-config
     alsa-lib
@@ -33,6 +34,7 @@ in mkShell.override {
     pkgs.cargo-insta
     pkgs.cargo-audit
     pkgs.cargo-expand
+    pkgs.simple-http-server
     pkgs.pre-commit
   ];
   shellHook = ''

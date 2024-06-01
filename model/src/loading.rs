@@ -1,12 +1,14 @@
-use crate::assets::sprite::texture_handles;
-use crate::loading::staggerer::Staggerer;
+use crate::assets::sprite::TextureCache;
+use crate::loading::staggerer::{Staggerer, StaggererImpl};
 use crate::registry::{PartialRegistry, Registry, RegistryItemSerialized};
 use crate::SpriteId;
 use assets_manager::loader::{BytesLoader, LoadFrom};
-use assets_manager::{loader, Asset, AssetCache, Compound, Handle, RecursiveDirectory};
+use assets_manager::source::Source;
+use assets_manager::{
+    loader, Asset, AssetCache, Compound, Handle, RecursiveDirectory, SharedBytes,
+};
 use itertools::Itertools;
 use macroquad::logging::{debug, info, trace, warn};
-use macroquad::prelude::Texture2D;
 use miette::Report;
 use scrapcore_serialization::registry::insert::asset_insert;
 use scrapcore_serialization::registry::path_identifier::PathIdentifier;
@@ -14,21 +16,20 @@ use scrapcore_serialization::registry::PartialRegistry as _;
 use scrapcore_serialization::serialization::error::{
     DeserializationError, DeserializationErrorKind, DeserializationErrorStackItem,
 };
-use std::time::Duration;
 
 mod staggerer;
 
-struct ImageBytes(Vec<u8>);
+struct ImageBytes(SharedBytes);
 
-impl From<Vec<u8>> for ImageBytes {
-    fn from(bytes: Vec<u8>) -> ImageBytes {
+impl From<SharedBytes> for ImageBytes {
+    fn from(bytes: SharedBytes) -> ImageBytes {
         ImageBytes(bytes)
     }
 }
 
 impl Asset for ImageBytes {
     const EXTENSIONS: &'static [&'static str] = &["png", "jpg", "jpeg"];
-    type Loader = LoadFrom<Vec<u8>, BytesLoader>;
+    type Loader = LoadFrom<SharedBytes, BytesLoader>;
 }
 
 impl Asset for RegistryItemSerialized {
@@ -40,17 +41,17 @@ type ItemsHandle = Handle<RecursiveDirectory<RegistryItemSerialized>>;
 type ImagesHandle = Handle<RecursiveDirectory<ImageBytes>>;
 
 #[derive(Debug)]
-pub struct LoadedMod<'a> {
+pub struct LoadedMod<'a, S> {
     registry: Registry,
-    cache: &'a AssetCache,
+    cache: &'a AssetCache<S>,
     items: &'a ItemsHandle,
     images: &'a ImagesHandle,
 
-    hot_reload_stagger: Staggerer,
+    hot_reload_stagger: StaggererImpl,
     want_full_reload: bool,
 }
 
-impl<'a> LoadedMod<'a> {
+impl<'a, S: Source + Sync> LoadedMod<'a, S> {
     pub fn registry(&self) -> &Registry {
         &self.registry
     }
@@ -58,7 +59,7 @@ impl<'a> LoadedMod<'a> {
     /// Loads a mod given the asset cache
     ///
     /// Errors can be safely handed, and should not affect any global state
-    pub fn load_mod(cache: &'a AssetCache) -> Result<Self, Report> {
+    pub fn load_mod(cache: &'a AssetCache<S>) -> Result<Self, Report> {
         Self::load_mod_inner(cache, None).map_err(diagnostic)
     }
 
@@ -116,9 +117,9 @@ impl<'a> LoadedMod<'a> {
     }
 }
 
-impl<'a> LoadedMod<'a> {
+impl<'a, S: Source> LoadedMod<'a, S> {
     fn load_mod_inner(
-        cache: &'a AssetCache,
+        cache: &'a AssetCache<S>,
         full_registry: Option<&Registry>,
     ) -> Result<Self, DeserializationError<PartialRegistry>> {
         let image_handles = cache.load_rec_dir::<ImageBytes>("").map_err(err_mr)?;
@@ -152,10 +153,7 @@ impl<'a> LoadedMod<'a> {
             cache,
             items: item_handles,
             images: image_handles,
-            hot_reload_stagger: Staggerer::new(
-                Duration::from_millis(150),
-                Duration::from_millis(1000),
-            ),
+            hot_reload_stagger: Staggerer::new(0.150, 1.0),
             want_full_reload: false,
         };
 
@@ -185,10 +183,10 @@ impl<'a> LoadedMod<'a> {
 
         // Confine static handles borrow into a block
         {
-            let mut handles = texture_handles().borrow_mut();
+            let mut cache = TextureCache::open();
             for image in changes {
-                let texture2d = Texture2D::from_file_with_format(&image.read().0, None);
-                handles.insert(image.id().to_string(), texture2d);
+                let bytes = image.read().0.clone();
+                cache.add_texture(image.id().to_string(), bytes);
             }
         }
 
@@ -207,8 +205,8 @@ impl<'a> LoadedMod<'a> {
     }
 }
 
-fn load_items<'a, T: Compound>(
-    cache: &'a AssetCache,
+fn load_items<'a, T: Compound, S: Source>(
+    cache: &'a AssetCache<S>,
     input: &'a Handle<RecursiveDirectory<T>>,
 ) -> Result<Vec<(PathIdentifier, &'a Handle<T>)>, assets_manager::Error> {
     let data: Vec<_> = input

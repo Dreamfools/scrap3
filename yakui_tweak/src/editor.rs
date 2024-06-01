@@ -1,13 +1,10 @@
 use std::iter::Peekable;
 
 use yakui::widgets::Pad;
-use yakui::{
-    colored_box_container, draggable, offset, pad, spacer, text, use_state, Color, MainAxisSize,
-    Vec2,
-};
+use yakui::{colored_box_container, draggable, offset, pad, use_state, Color, Vec2};
 
 use yakui_widgets_plus::collapsing::collapsing;
-use yakui_widgets_plus::list_ext::{column_shrink, ListExt};
+use yakui_widgets_plus::list_ext::column_shrink;
 
 use crate::{Name, Tweakable};
 

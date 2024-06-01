@@ -1,4 +1,5 @@
 use enum_decompose::decompose;
+use macroquad::color::{Color, WHITE};
 use strum::EnumIs;
 
 use math::arc::{arc_angles, arc_center_radius};
@@ -29,7 +30,7 @@ pub type BoardViewRect = Rect<BoardView>;
 pub struct GemDrawInfo {
     pub rect: BoardViewRect,
     pub layer: usize,
-    pub opacity: f32,
+    pub tint: Color,
 }
 
 pub fn fall_gravity() -> f32 {
@@ -152,7 +153,7 @@ impl GemVisuals {
             ui.rect.size.height *= 1.0 - simple_easing::back_in(progress) / 2.0;
         }
 
-        ui.opacity = opacity;
+        ui.tint.a *= opacity;
     }
 }
 
@@ -224,7 +225,7 @@ impl GemAnimation {
         let mut ui = GemDrawInfo {
             rect: grid.rect_at_index(pos),
             layer: 0,
-            opacity: 1.0,
+            tint: WHITE,
         };
         let progress = ((time - self.start) / (self.end - self.start)).clamp(0.0, 1.0);
 

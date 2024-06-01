@@ -1,5 +1,5 @@
 use yakui::widgets::{List, ListResponse};
-use yakui::{CrossAxisAlignment, Direction, MainAxisAlignment, MainAxisSize, Response};
+use yakui::{CrossAxisAlignment, MainAxisAlignment, MainAxisSize, Response};
 
 // with_direction: Direction,
 // with_item_spacing: f32,

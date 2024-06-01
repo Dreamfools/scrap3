@@ -1,0 +1,8 @@
+{
+  "type": "GemColor",
+  "id": "heal",
+  "sprite": {
+    "sprite": "Gem Type4 Black",
+    "tint": "#ff1493"
+  }
+}

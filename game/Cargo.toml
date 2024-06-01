@@ -7,7 +7,6 @@ edition = "2021"
 [dependencies]
 ahash = { workspace = true }
 enum_decompose = { workspace = true }
-getrandom = { workspace = true, features = ["js"] }
 inline_tweak = { workspace = true, features = ["derive"] }
 luck = { workspace = true }
 macroquad = { workspace = true }
@@ -24,8 +23,10 @@ yakui = { workspace = true }
 yakui-macroquad = { workspace = true }
 yakui_tweak = { workspace = true }
 
-[package.metadata.cargo-machete]
-ignored = ["getrandom"]
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { workspace = true, features = ["custom"] }
+sapp-jsutils = { workspace = true }
+assets_manager = { workspace = true, features = ["embedded"] }
 
 [lints]
 workspace = true
